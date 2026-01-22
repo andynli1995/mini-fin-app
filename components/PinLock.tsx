@@ -149,6 +149,66 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     }
   }, [enteredPin, isSettingUp])
 
+  // Handle keyboard input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle keyboard input when locked or setting up
+      if (!isLocked && !isSettingUp) return
+
+      // Handle number keys (0-9)
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault()
+        if (isSettingUp) {
+          if (showConfirm) {
+            handleConfirmPinInput(e.key)
+          } else {
+            handlePinInput(e.key)
+          }
+        } else {
+          handlePinInput(e.key)
+        }
+      }
+      // Handle backspace/delete
+      else if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault()
+        if (isSettingUp) {
+          if (showConfirm) {
+            handleConfirmPinBackspace()
+          } else {
+            handleBackspace()
+          }
+        } else {
+          handleBackspace()
+        }
+      }
+      // Handle Enter key
+      else if (e.key === 'Enter') {
+        e.preventDefault()
+        if (isSettingUp) {
+          if (showConfirm) {
+            if (confirmPin === pin && confirmPin.length >= 4) {
+              setupPin()
+            }
+          } else {
+            if (pin.length >= 4) {
+              setShowConfirm(true)
+              setError('')
+            }
+          }
+        } else {
+          if (enteredPin.length >= 4) {
+            unlockApp()
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isLocked, isSettingUp, showConfirm, pin, confirmPin, enteredPin])
+
   if (isSettingUp) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
@@ -157,6 +217,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
             <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900">Set Up PIN</h1>
             <p className="text-gray-600 mt-2">Create a 4-6 digit PIN to secure your financial data</p>
+            <p className="text-xs text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
           </div>
 
           {!showConfirm ? (
@@ -295,6 +356,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
             <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900">App Locked</h1>
             <p className="text-gray-600 mt-2">Enter your PIN to unlock</p>
+            <p className="text-xs text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
           </div>
 
           <div className="mb-6">
