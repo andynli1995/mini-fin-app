@@ -18,14 +18,16 @@ export default async function WalletsPage() {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Wallets</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Wallets</h1>
             <p className="mt-2 text-sm text-gray-600">
               Manage your virtual wallets and track balances
             </p>
           </div>
-          <WalletForm />
+          <div className="flex-shrink-0">
+            <WalletForm />
+          </div>
         </div>
         <WalletsList wallets={wallets} />
       </div>

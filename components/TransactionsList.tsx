@@ -45,9 +45,60 @@ export default function TransactionsList({ transactions }: TransactionsListProps
     }
   }
 
+  // Mobile card view
+  const MobileCard = ({ transaction }: { transaction: TransactionWithRelations }) => (
+    <div className="bg-white rounded-lg shadow p-4 mb-4">
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-2">
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(
+                transaction.type
+              )}`}
+            >
+              {transaction.type === 'income' ? (
+                <ArrowDownLeft className="w-3 h-3 mr-1" />
+              ) : (
+                <ArrowUpRight className="w-3 h-3 mr-1" />
+              )}
+              {transaction.type}
+            </span>
+          </div>
+          <p className="font-medium text-gray-900">{transaction.category.name}</p>
+          <p className="text-sm text-gray-500 mt-1">
+            {format(new Date(transaction.date), 'MMM d, yyyy')} • {transaction.wallet.name}
+          </p>
+          {transaction.note && (
+            <p className="text-sm text-gray-500 mt-1">{transaction.note}</p>
+          )}
+        </div>
+        <div className="text-right ml-4">
+          <p
+            className={`text-lg font-semibold ${
+              transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
+            {transaction.type === 'income' ? '+' : '-'}$
+            {Math.abs(Number(transaction.amount)).toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+          <button
+            onClick={() => handleDelete(transaction.id)}
+            className="mt-2 text-red-600 hover:text-red-900"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -134,6 +185,19 @@ export default function TransactionsList({ transactions }: TransactionsListProps
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden p-4">
+        {transactions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No transactions yet. Add your first transaction to get started.
+          </div>
+        ) : (
+          transactions.map((transaction) => (
+            <MobileCard key={transaction.id} transaction={transaction} />
+          ))
+        )}
       </div>
     </div>
   )

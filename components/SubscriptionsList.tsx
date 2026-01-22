@@ -70,9 +70,84 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
     }
   }
 
+  // Mobile card view
+  const MobileCard = ({ subscription }: { subscription: SubscriptionWithWallet }) => {
+    const daysUntil = getDaysUntilDue(subscription.nextDueDate)
+    const isOverdue = daysUntil < 0 && subscription.isActive
+
+    return (
+      <div className="bg-white rounded-lg shadow p-4 mb-4">
+        <div className="flex justify-between items-start mb-3">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="font-semibold text-gray-900">{subscription.serviceName}</h3>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  subscription.isActive
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {subscription.isActive ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+            <p className="text-lg font-semibold text-gray-900 mb-1">
+              ${Number(subscription.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-sm text-gray-500 capitalize mb-2">{subscription.period}</p>
+            <div className="flex items-center text-sm text-gray-600 mb-1">
+              <Calendar className="w-4 h-4 mr-2" />
+              <span>{format(new Date(subscription.nextDueDate), 'MMM d, yyyy')}</span>
+            </div>
+            {isOverdue && (
+              <div className="flex items-center text-xs text-red-600 mb-1">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                Overdue
+              </div>
+            )}
+            {!isOverdue && subscription.isActive && daysUntil <= 7 && (
+              <div className="flex items-center text-xs text-yellow-600 mb-1">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {daysUntil === 0
+                  ? 'Due today'
+                  : daysUntil === 1
+                  ? 'Due tomorrow'
+                  : `${daysUntil} days`}
+              </div>
+            )}
+            {subscription.paymentMethod && (
+              <p className="text-sm text-gray-500">{subscription.paymentMethod}</p>
+            )}
+            {subscription.note && (
+              <p className="text-sm text-gray-500 mt-1">{subscription.note}</p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 ml-4">
+            {subscription.isActive && subscription.walletId && (
+              <button
+                onClick={() => handleMarkPaid(subscription)}
+                className="text-green-600 hover:text-green-900"
+                title="Mark as paid"
+              >
+                <CheckCircle className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              onClick={() => handleDelete(subscription.id)}
+              className="text-red-600 hover:text-red-900"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -189,6 +264,19 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden p-4">
+        {subscriptions.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No subscriptions yet. Add your first subscription to get started.
+          </div>
+        ) : (
+          subscriptions.map((subscription) => (
+            <MobileCard key={subscription.id} subscription={subscription} />
+          ))
+        )}
       </div>
     </div>
   )

@@ -60,9 +60,9 @@ export default async function Dashboard() {
         <RemindersBanner subscriptions={allActiveSubscriptions} />
 
         {/* Total Balance Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-6 text-white">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-4 sm:p-6 text-white">
           <p className="text-blue-100 text-sm font-medium">Total Balance</p>
-          <p className="text-4xl font-bold mt-2">
+          <p className="text-2xl sm:text-4xl font-bold mt-2">
             ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>

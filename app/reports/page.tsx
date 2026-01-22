@@ -25,7 +25,7 @@ export default async function ReportsPage() {
     <Layout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Reports</h1>
           <p className="mt-2 text-sm text-gray-600">
             Analyze your financial data with categorized reports and charts
           </p>

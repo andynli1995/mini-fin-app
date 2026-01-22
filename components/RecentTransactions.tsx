@@ -37,9 +37,9 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
+    <div className="bg-white rounded-lg shadow p-4 sm:p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Recent Transactions</h2>
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Recent Transactions</h2>
         <Link href="/transactions" className="text-sm text-blue-600 hover:text-blue-800">
           View all
         </Link>
@@ -51,22 +51,22 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
           transactions.map((transaction) => (
             <div
               key={transaction.id}
-              className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50"
+              className="flex items-center justify-between p-2 sm:p-3 rounded-lg hover:bg-gray-50"
             >
-              <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-full ${getTypeColor(transaction.type)}`}>
+              <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                <div className={`p-1.5 sm:p-2 rounded-full flex-shrink-0 ${getTypeColor(transaction.type)}`}>
                   {getTypeIcon(transaction.type)}
                 </div>
-                <div>
-                  <p className="font-medium text-gray-900">{transaction.category.name}</p>
-                  <p className="text-sm text-gray-500">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-gray-900 truncate">{transaction.category.name}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 truncate">
                     {format(new Date(transaction.date), 'MMM d, yyyy')} • {transaction.wallet.name}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex-shrink-0 ml-2">
                 <p
-                  className={`font-semibold ${
+                  className={`text-sm sm:text-base font-semibold ${
                     transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
                   }`}
                 >
