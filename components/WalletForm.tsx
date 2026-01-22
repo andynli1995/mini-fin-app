@@ -9,6 +9,11 @@ interface Wallet {
   type: string
   currency: string
   balance: number
+  _count?: {
+    transactions: number
+  }
+  createdAt?: Date
+  updatedAt?: Date
 }
 
 interface WalletFormProps {
