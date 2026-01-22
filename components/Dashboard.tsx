@@ -96,6 +96,7 @@ export default async function Dashboard() {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     const isDirectConnection = errorMessage.includes(':5432')
     const isPoolerConnection = errorMessage.includes(':6543')
+    const isTableMissing = errorMessage.includes('does not exist') || errorMessage.includes('table')
     
     return (
       <div className="space-y-6">
@@ -131,7 +132,30 @@ export default async function Dashboard() {
             </div>
           )}
           
-          {(isPoolerConnection || errorMessage.includes('Circuit breaker')) && (
+          {isTableMissing && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-semibold text-blue-800 mb-2">📋 Database Schema Not Created</h3>
+              <p className="text-sm text-blue-700 mb-2">
+                The database connection is working, but the tables haven&apos;t been created yet.
+              </p>
+              <p className="text-sm text-blue-700 mb-3">
+                <strong>Solution:</strong> Run the following commands to create the database schema:
+              </p>
+              <div className="bg-blue-100 rounded p-3 mb-3">
+                <code className="text-sm text-blue-900 block">
+                  npx prisma generate
+                </code>
+                <code className="text-sm text-blue-900 block mt-2">
+                  npx prisma db push
+                </code>
+              </div>
+              <p className="text-sm text-blue-700">
+                <strong>For Vercel:</strong> You can run these commands locally (they will connect to your Supabase database) or set up a migration workflow.
+              </p>
+            </div>
+          )}
+          
+          {(isPoolerConnection || errorMessage.includes('Circuit breaker')) && !isTableMissing && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
               <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Circuit Breaker Open</h3>
               <p className="text-sm text-yellow-700 mb-2">
