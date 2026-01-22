@@ -1,3 +1,6 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Subscription, Wallet } from '@prisma/client'
 import { differenceInDays, format } from 'date-fns'
 import { AlertCircle, Bell } from 'lucide-react'
@@ -12,11 +15,29 @@ interface RemindersBannerProps {
 }
 
 export default function RemindersBanner({ subscriptions }: RemindersBannerProps) {
+  const [reminderDays, setReminderDays] = useState(7)
+
+  useEffect(() => {
+    // Fetch reminder days setting
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setReminderDays(data.reminderDays || 7)
+        }
+      } catch (error) {
+        console.error('Error fetching reminder days:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
+
   const now = new Date()
   const upcomingSubscriptions = subscriptions.filter((sub) => {
     if (!sub.isActive) return false
     const daysUntil = differenceInDays(new Date(sub.nextDueDate), now)
-    return daysUntil <= 7 && daysUntil >= 0
+    return daysUntil <= reminderDays && daysUntil >= 0
   })
 
   const overdueSubscriptions = subscriptions.filter((sub) => {
@@ -59,7 +80,7 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
             <Bell className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3" />
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
-                {upcomingSubscriptions.length} Upcoming Subscription{upcomingSubscriptions.length !== 1 ? 's' : ''} (Next 7 Days)
+                {upcomingSubscriptions.length} Upcoming Subscription{upcomingSubscriptions.length !== 1 ? 's' : ''} (Next {reminderDays} Days)
               </h3>
               <ul className="text-sm text-yellow-700 dark:text-yellow-400 mt-1 space-y-1">
                 {upcomingSubscriptions.map((sub) => {

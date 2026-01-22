@@ -16,6 +16,8 @@ export async function GET() {
       isLocked: settings?.isLocked || false,
       hideBalancesByDefault: settings?.hideBalancesByDefault || false,
       lockTimeoutMinutes: settings?.lockTimeoutMinutes || 5,
+      enableNotifications: settings?.enableNotifications ?? true,
+      reminderDays: settings?.reminderDays || 7,
     })
   } catch (error) {
     console.error('Error fetching settings:', error)
@@ -29,7 +31,7 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { hideBalancesByDefault, lockTimeoutMinutes } = body
+    const { hideBalancesByDefault, lockTimeoutMinutes, enableNotifications, reminderDays } = body
 
     let settings = await prisma.appSettings.findFirst()
     
@@ -40,12 +42,20 @@ export async function PUT(request: NextRequest) {
     if (typeof lockTimeoutMinutes === 'number' && lockTimeoutMinutes > 0) {
       updateData.lockTimeoutMinutes = lockTimeoutMinutes
     }
+    if (typeof enableNotifications === 'boolean') {
+      updateData.enableNotifications = enableNotifications
+    }
+    if (typeof reminderDays === 'number' && reminderDays > 0 && reminderDays <= 30) {
+      updateData.reminderDays = reminderDays
+    }
     
     if (!settings) {
       settings = await prisma.appSettings.create({
         data: {
           hideBalancesByDefault: hideBalancesByDefault || false,
           lockTimeoutMinutes: lockTimeoutMinutes || 5,
+          enableNotifications: enableNotifications ?? true,
+          reminderDays: reminderDays || 7,
         },
       })
     } else {
@@ -59,6 +69,8 @@ export async function PUT(request: NextRequest) {
       success: true, 
       hideBalancesByDefault: settings.hideBalancesByDefault,
       lockTimeoutMinutes: settings.lockTimeoutMinutes,
+      enableNotifications: settings.enableNotifications,
+      reminderDays: settings.reminderDays,
     })
   } catch (error) {
     console.error('Error updating settings:', error)

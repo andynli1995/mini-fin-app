@@ -3,6 +3,7 @@ import "./globals.css";
 import PinLock from "@/components/PinLock";
 import InstallPrompt from "@/components/InstallPrompt";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import NotificationService from "@/components/NotificationService";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <ServiceWorkerRegistration />
+          <NotificationService />
           <PinLock>
             {children}
             <InstallPrompt />

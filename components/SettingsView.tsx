@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Lock, Save, Download, Sun, Moon, Monitor } from 'lucide-react'
+import { Eye, EyeOff, Lock, Save, Download, Sun, Moon, Monitor, Bell, BellOff } from 'lucide-react'
 import { useInstallPWA } from './useInstallPWA'
 import { useTheme } from './ThemeProvider'
 
@@ -9,6 +9,9 @@ export default function SettingsView() {
   const [hasPin, setHasPin] = useState(false)
   const [hideBalancesByDefault, setHideBalancesByDefault] = useState(false)
   const [lockTimeoutMinutes, setLockTimeoutMinutes] = useState(5)
+  const [enableNotifications, setEnableNotifications] = useState(true)
+  const [reminderDays, setReminderDays] = useState(7)
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
@@ -30,6 +33,13 @@ export default function SettingsView() {
     fetchSettings()
   }, [])
 
+  useEffect(() => {
+    // Check notification permission
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission)
+    }
+  }, [])
+
   const fetchSettings = async () => {
     try {
       const response = await fetch('/api/settings')
@@ -38,6 +48,8 @@ export default function SettingsView() {
         setHasPin(data.hasPin)
         setHideBalancesByDefault(data.hideBalancesByDefault || false)
         setLockTimeoutMinutes(data.lockTimeoutMinutes || 5)
+        setEnableNotifications(data.enableNotifications ?? true)
+        setReminderDays(data.reminderDays || 7)
         // Also update localStorage for dashboard
         localStorage.setItem('hideBalances', data.hideBalancesByDefault ? 'true' : 'false')
       }
@@ -45,6 +57,23 @@ export default function SettingsView() {
       console.error('Error fetching settings:', error)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleRequestNotificationPermission = async () => {
+    if (!('Notification' in window)) {
+      alert('This browser does not support notifications')
+      return
+    }
+
+    const permission = await Notification.requestPermission()
+    setNotificationPermission(permission)
+    
+    if (permission === 'granted') {
+      setSaveSuccess('Notification permission granted!')
+      setTimeout(() => setSaveSuccess(''), 3000)
+    } else if (permission === 'denied') {
+      setSaveError('Notification permission denied. Please enable it in your browser settings.')
     }
   }
 
@@ -59,6 +88,8 @@ export default function SettingsView() {
         body: JSON.stringify({ 
           hideBalancesByDefault,
           lockTimeoutMinutes,
+          enableNotifications,
+          reminderDays,
         }),
       })
 
@@ -218,6 +249,95 @@ export default function SettingsView() {
               <p className="text-sm text-green-600 dark:text-green-400">{saveSuccess}</p>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Notification Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+          {notificationPermission === 'granted' ? (
+            <Bell className="w-5 h-5 mr-2 text-green-600 dark:text-green-400" />
+          ) : (
+            <BellOff className="w-5 h-5 mr-2 text-gray-400 dark:text-gray-500" />
+          )}
+          Notification Settings
+        </h2>
+        <div className="space-y-4">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Enable Browser Notifications
+                </label>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Get notified about upcoming subscription due dates
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={enableNotifications}
+                  onChange={(e) => setEnableNotifications(e.target.checked)}
+                  className="sr-only peer"
+                  disabled={notificationPermission === 'denied'}
+                />
+                <div className="w-11 h-6 bg-gray-200 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-slate-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500 peer-disabled:opacity-50"></div>
+              </label>
+            </div>
+            {notificationPermission !== 'granted' && (
+              <div className="mt-3">
+                <button
+                  onClick={handleRequestNotificationPermission}
+                  disabled={notificationPermission === 'denied'}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  {notificationPermission === 'denied'
+                    ? 'Permission Denied - Enable in Browser Settings'
+                    : 'Request Notification Permission'}
+                </button>
+                {notificationPermission === 'denied' && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                    Notifications are blocked. Please enable them in your browser settings.
+                  </p>
+                )}
+              </div>
+            )}
+            {notificationPermission === 'granted' && (
+              <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                ✓ Notification permission granted
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Reminder Days
+            </label>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+              How many days before a subscription due date to send a reminder notification
+            </p>
+            <select
+              value={reminderDays}
+              onChange={(e) => setReminderDays(parseInt(e.target.value, 10))}
+              className="block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+            >
+              <option value={1}>1 day before</option>
+              <option value={3}>3 days before</option>
+              <option value={7}>7 days before</option>
+              <option value={14}>14 days before</option>
+              <option value={30}>30 days before</option>
+            </select>
+          </div>
+
+          <button
+            onClick={handleSavePreferences}
+            disabled={isSaving}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isSaving ? 'Saving...' : 'Save Notification Settings'}
+          </button>
         </div>
       </div>
 

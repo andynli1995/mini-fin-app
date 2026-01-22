@@ -84,6 +84,8 @@ model AppSettings {
   isLocked             Boolean  @default(false)
   hideBalancesByDefault Boolean @default(false) // Hide balances by default on dashboard
   lockTimeoutMinutes   Int      @default(5) // Minutes before auto-lock after unlock
+  enableNotifications  Boolean  @default(true) // Enable browser push notifications
+  reminderDays         Int      @default(7) // Days before subscription due date to send reminder
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   

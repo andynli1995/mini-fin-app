@@ -120,3 +120,66 @@ self.addEventListener('activate', (event) => {
   // Take control of all clients immediately
   return self.clients.claim()
 })
+
+// Notification click handler
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If a window is already open, focus it
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i]
+        if (client.url.includes('/subscriptions') && 'focus' in client) {
+          return client.focus()
+        }
+      }
+      // Otherwise, open a new window
+      if (clients.openWindow) {
+        return clients.openWindow('/subscriptions')
+      }
+    })
+  )
+})
+
+// Periodic background sync for subscription reminders (if supported)
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'check-subscriptions') {
+    event.waitUntil(checkSubscriptions())
+  }
+})
+
+// Function to check subscriptions and send notifications
+async function checkSubscriptions() {
+  try {
+    const response = await fetch('/api/subscriptions/check-reminders')
+    if (response.ok) {
+      const data = await response.json()
+      if (data.subscriptions && data.subscriptions.length > 0) {
+        data.subscriptions.forEach((sub) => {
+          self.registration.showNotification(sub.title, {
+            body: sub.body,
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            tag: `subscription-${sub.id}`,
+            requireInteraction: false,
+            data: {
+              url: '/subscriptions',
+              subscriptionId: sub.id,
+            },
+          })
+        })
+      }
+    }
+  } catch (error) {
+    console.error('Error checking subscriptions:', error)
+  }
+}
+
+// Check subscriptions on service worker startup
+checkSubscriptions()
+
+// Set up periodic checks (every hour)
+setInterval(() => {
+  checkSubscriptions()
+}, 60 * 60 * 1000) // 1 hour
