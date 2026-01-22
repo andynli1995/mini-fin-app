@@ -58,9 +58,9 @@ export default function WalletForm() {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white m-4 sm:m-auto">
+      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 m-4 sm:m-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Add Wallet</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Wallet</h3>
           <button
             onClick={() => setIsOpen(false)}
             className="text-gray-400 hover:text-gray-600"
@@ -70,35 +70,35 @@ export default function WalletForm() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Payoneer, MEXC"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
             <input
               type="text"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value })}
               placeholder="e.g., Digital Wallet, Bank, Cash"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Currency</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Currency</label>
             <select
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
@@ -109,13 +109,13 @@ export default function WalletForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Initial Balance</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Balance</label>
             <input
               type="number"
               step="0.01"
               value={formData.balance}
               onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 

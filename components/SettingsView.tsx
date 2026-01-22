@@ -8,8 +8,11 @@ import { useTheme } from './ThemeProvider'
 export default function SettingsView() {
   const [hasPin, setHasPin] = useState(false)
   const [hideBalancesByDefault, setHideBalancesByDefault] = useState(false)
+  const [lockTimeoutMinutes, setLockTimeoutMinutes] = useState(5)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [saveSuccess, setSaveSuccess] = useState('')
   const { install, canInstall, isInstalled, hasPrompt } = useInstallPWA()
   
   // PIN update form
@@ -34,6 +37,7 @@ export default function SettingsView() {
         const data = await response.json()
         setHasPin(data.hasPin)
         setHideBalancesByDefault(data.hideBalancesByDefault || false)
+        setLockTimeoutMinutes(data.lockTimeoutMinutes || 5)
         // Also update localStorage for dashboard
         localStorage.setItem('hideBalances', data.hideBalancesByDefault ? 'true' : 'false')
       }
@@ -46,21 +50,30 @@ export default function SettingsView() {
 
   const handleSavePreferences = async () => {
     setIsSaving(true)
+    setSaveError('')
+    setSaveSuccess('')
     try {
       const response = await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ hideBalancesByDefault }),
+        body: JSON.stringify({ 
+          hideBalancesByDefault,
+          lockTimeoutMinutes,
+        }),
       })
 
       if (response.ok) {
+        const data = await response.json()
         localStorage.setItem('hideBalances', hideBalancesByDefault ? 'true' : 'false')
-        alert('Preferences saved successfully!')
+        setSaveSuccess('Preferences saved successfully!')
+        setTimeout(() => setSaveSuccess(''), 3000)
       } else {
-        alert('Failed to save preferences')
+        const errorData = await response.json()
+        setSaveError(errorData.error || 'Failed to save preferences')
       }
     } catch (error) {
-      alert('Failed to save preferences')
+      console.error('Error saving preferences:', error)
+      setSaveError('Failed to save preferences. Please try again.')
     } finally {
       setIsSaving(false)
     }
@@ -195,8 +208,57 @@ export default function SettingsView() {
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Preferences'}
           </button>
+          {saveError && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">{saveError}</p>
+            </div>
+          )}
+          {saveSuccess && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+              <p className="text-sm text-green-600 dark:text-green-400">{saveSuccess}</p>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Security Settings */}
+      {hasPin && (
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+            <Lock className="w-5 h-5 mr-2" />
+            Security Settings
+          </h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Auto-lock Timeout
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                How long to keep the app unlocked after entering PIN (in minutes). The app will automatically lock after this period of inactivity.
+              </p>
+              <select
+                value={lockTimeoutMinutes}
+                onChange={(e) => setLockTimeoutMinutes(parseInt(e.target.value, 10))}
+                className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+              >
+                <option value={5}>5 minutes</option>
+                <option value={10}>10 minutes</option>
+                <option value={15}>15 minutes</option>
+                <option value={30}>30 minutes</option>
+                <option value={60}>1 hour</option>
+              </select>
+            </div>
+            <button
+              onClick={handleSavePreferences}
+              disabled={isSaving}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? 'Saving...' : 'Save Preferences'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* PIN Settings */}
       {hasPin && (

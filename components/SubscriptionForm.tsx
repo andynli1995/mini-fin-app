@@ -88,9 +88,9 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white m-4 sm:m-auto">
+      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 m-4 sm:m-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Add Subscription</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Subscription</h3>
           <button
             onClick={() => setIsOpen(false)}
             className="text-gray-400 hover:text-gray-600"
@@ -100,35 +100,35 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Service Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Service Name</label>
             <input
               type="text"
               value={formData.serviceName}
               onChange={(e) => setFormData({ ...formData, serviceName: e.target.value })}
               placeholder="e.g., Netflix, Spotify"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
             <input
               type="number"
               step="0.01"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Period</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Period</label>
             <select
               value={formData.period}
               onChange={(e) => setFormData({ ...formData, period: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             >
               <option value="daily">Daily</option>
@@ -139,33 +139,33 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Start Date</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Start Date</label>
             <input
               type="date"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
             <input
               type="text"
               value={formData.paymentMethod}
               onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value })}
               placeholder="e.g., Credit Card, PayPal"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Wallet (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wallet (optional)</label>
             <select
               value={formData.walletId}
               onChange={(e) => setFormData({ ...formData, walletId: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             >
               <option value="">None</option>
               {wallets.map((wallet) => (
@@ -177,12 +177,12 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Note (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Note (optional)</label>
             <textarea
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 

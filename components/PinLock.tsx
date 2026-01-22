@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react'
 import { Lock, Unlock } from 'lucide-react'
 
-const INACTIVITY_TIMEOUT = 5 * 60 * 1000 // 5 minutes
+// INACTIVITY_TIMEOUT is now dynamic based on user settings
 
 interface PinLockContextType {
   lockApp: () => void
@@ -30,26 +30,48 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
   const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [lockTimeoutMinutes, setLockTimeoutMinutes] = useState(5)
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch PIN status from database
   useEffect(() => {
     const fetchPinStatus = async () => {
       try {
-        const response = await fetch('/api/settings/pin')
+        const response = await fetch('/api/settings')
         if (response.ok) {
           const data = await response.json()
           setHasPin(data.hasPin)
-          // Lock by default on first load if PIN exists
-          // This ensures the app is always locked when opened, even if isLocked was false in DB
+          setLockTimeoutMinutes(data.lockTimeoutMinutes || 5)
+          
           if (data.hasPin) {
-            setIsLocked(true)
-            // Update database to reflect locked state
-            await fetch('/api/settings/pin', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ isLocked: true }),
-            })
+            // Check if user was recently unlocked and timeout hasn't expired
+            const unlockTimestamp = localStorage.getItem('appUnlockTimestamp')
+            const timeoutMs = (data.lockTimeoutMinutes || 5) * 60 * 1000
+            
+            if (unlockTimestamp) {
+              const timeSinceUnlock = Date.now() - parseInt(unlockTimestamp, 10)
+              if (timeSinceUnlock < timeoutMs) {
+                // Still within timeout period, don't lock
+                setIsLocked(false)
+              } else {
+                // Timeout expired, lock the app
+                setIsLocked(true)
+                localStorage.removeItem('appUnlockTimestamp')
+                await fetch('/api/settings/pin', {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ isLocked: true }),
+                })
+              }
+            } else {
+              // No unlock timestamp, lock by default
+              setIsLocked(true)
+              await fetch('/api/settings/pin', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isLocked: true }),
+              })
+            }
           } else {
             setIsLocked(false)
           }
@@ -75,11 +97,14 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       setIsLocked(true)
       setEnteredPin('')
       setError('')
+      // Clear unlock timestamp when manually locking
+      localStorage.removeItem('appUnlockTimestamp')
     } catch (error) {
       console.error('Error locking app:', error)
       setIsLocked(true)
       setEnteredPin('')
       setError('')
+      localStorage.removeItem('appUnlockTimestamp')
     }
   }, [])
 
@@ -87,10 +112,12 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current)
     }
+    const timeoutMs = lockTimeoutMinutes * 60 * 1000
     inactivityTimerRef.current = setTimeout(() => {
       lockApp()
-    }, INACTIVITY_TIMEOUT)
-  }, [lockApp])
+      localStorage.removeItem('appUnlockTimestamp')
+    }, timeoutMs)
+  }, [lockApp, lockTimeoutMinutes])
 
   const unlockApp = useCallback(async () => {
     if (enteredPin.length < 4) {
@@ -110,6 +137,8 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         setIsLocked(false)
         setEnteredPin('')
         setError('')
+        // Store unlock timestamp in localStorage
+        localStorage.setItem('appUnlockTimestamp', Date.now().toString())
         resetInactivityTimer()
       } else {
         const errorData = await response.json()
@@ -176,6 +205,8 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         setPin('')
         setConfirmPin('')
         setError('')
+        // Store unlock timestamp in localStorage
+        localStorage.setItem('appUnlockTimestamp', Date.now().toString())
         resetInactivityTimer()
       } else {
         const errorData = await response.json()

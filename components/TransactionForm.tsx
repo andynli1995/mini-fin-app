@@ -69,9 +69,9 @@ export default function TransactionForm({ categories, wallets }: TransactionForm
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white m-4 sm:m-auto">
+      <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 m-4 sm:m-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">Add Transaction</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Transaction</h3>
           <button
             onClick={() => setIsOpen(false)}
             className="text-gray-400 hover:text-gray-600"
@@ -81,13 +81,13 @@ export default function TransactionForm({ categories, wallets }: TransactionForm
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Type</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
             <select
               value={formData.type}
               onChange={(e) => {
                 setFormData({ ...formData, type: e.target.value, categoryId: '' })
               }}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             >
               <option value="expense">Expense</option>
@@ -98,11 +98,11 @@ export default function TransactionForm({ categories, wallets }: TransactionForm
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
             <select
               value={formData.categoryId}
               onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             >
               <option value="">Select a category</option>
@@ -115,11 +115,11 @@ export default function TransactionForm({ categories, wallets }: TransactionForm
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Wallet</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Wallet</label>
             <select
               value={formData.walletId}
               onChange={(e) => setFormData({ ...formData, walletId: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             >
               <option value="">Select a wallet</option>
@@ -132,35 +132,35 @@ export default function TransactionForm({ categories, wallets }: TransactionForm
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
             <input
               type="number"
               step="0.01"
               value={formData.amount}
               onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Date</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
             <input
               type="date"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Note (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Note (optional)</label>
             <textarea
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
               rows={3}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
             />
           </div>
 

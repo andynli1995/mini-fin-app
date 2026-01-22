@@ -15,6 +15,7 @@ export async function GET() {
       hasPin: !!settings?.pinHash,
       isLocked: settings?.isLocked || false,
       hideBalancesByDefault: settings?.hideBalancesByDefault || false,
+      lockTimeoutMinutes: settings?.lockTimeoutMinutes || 5,
     })
   } catch (error) {
     console.error('Error fetching settings:', error)
@@ -28,22 +29,37 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { hideBalancesByDefault } = body
+    const { hideBalancesByDefault, lockTimeoutMinutes } = body
 
     let settings = await prisma.appSettings.findFirst()
     
+    const updateData: any = {}
+    if (typeof hideBalancesByDefault === 'boolean') {
+      updateData.hideBalancesByDefault = hideBalancesByDefault
+    }
+    if (typeof lockTimeoutMinutes === 'number' && lockTimeoutMinutes > 0) {
+      updateData.lockTimeoutMinutes = lockTimeoutMinutes
+    }
+    
     if (!settings) {
       settings = await prisma.appSettings.create({
-        data: { hideBalancesByDefault: hideBalancesByDefault || false },
+        data: {
+          hideBalancesByDefault: hideBalancesByDefault || false,
+          lockTimeoutMinutes: lockTimeoutMinutes || 5,
+        },
       })
     } else {
       settings = await prisma.appSettings.update({
         where: { id: settings.id },
-        data: { hideBalancesByDefault: hideBalancesByDefault || false },
+        data: updateData,
       })
     }
 
-    return NextResponse.json({ success: true, hideBalancesByDefault: settings.hideBalancesByDefault })
+    return NextResponse.json({ 
+      success: true, 
+      hideBalancesByDefault: settings.hideBalancesByDefault,
+      lockTimeoutMinutes: settings.lockTimeoutMinutes,
+    })
   } catch (error) {
     console.error('Error updating settings:', error)
     return NextResponse.json(

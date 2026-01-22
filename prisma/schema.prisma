@@ -83,6 +83,7 @@ model AppSettings {
   pinHash              String?  // Hashed PIN code
   isLocked             Boolean  @default(false)
   hideBalancesByDefault Boolean @default(false) // Hide balances by default on dashboard
+  lockTimeoutMinutes   Int      @default(5) // Minutes before auto-lock after unlock
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
   

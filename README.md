@@ -194,12 +194,85 @@ mini-fin-app/
 
 **Your database data is safe!** 
 
-- ✅ Supabase is a persistent database - data is stored permanently
-- ✅ Schema changes are **NOT** applied automatically on Vercel deployments
-- ✅ Only `prisma generate` runs during build (creates Prisma Client)
-- ✅ `prisma db push` is **NOT** run automatically - you control when schema updates happen
+### Why Your Data is Safe
 
-See [DATABASE_SAFETY.md](./DATABASE_SAFETY.md) for detailed information about data persistence and safety.
+1. **Supabase is a Persistent Database**
+   - Supabase is a managed PostgreSQL service that stores data permanently
+   - Your database exists independently of your Vercel deployments
+   - Data persists across all deployments, restarts, and code changes
+
+2. **No Automatic Schema Changes on Deploy**
+   - **Build script**: Only runs `prisma generate && next build` (generates Prisma Client, builds Next.js)
+   - **Postinstall script**: Only runs `prisma generate` (generates Prisma Client)
+   - **No `prisma db push`** is run automatically on Vercel
+   - Schema changes are **NOT** applied automatically
+   - Your existing data remains untouched
+   - You have full control over when to update the schema
+
+3. **Manual Schema Updates**
+   When you need to update the database schema:
+   - **Run locally** (recommended):
+     ```bash
+     # Use direct connection in .env
+     npx prisma db push
+     ```
+   - **Or use Prisma Migrations** (better for production):
+     ```bash
+     npx prisma migrate dev --name your_migration_name
+     ```
+
+### What Happens on Each Vercel Deploy
+
+1. ✅ Code is deployed
+2. ✅ `prisma generate` runs (creates Prisma Client)
+3. ✅ Next.js builds your app
+4. ❌ **NO** database schema changes
+5. ❌ **NO** data deletion
+6. ❌ **NO** database resets
+
+### Verifying Your Data is Safe
+
+1. **Check Supabase Dashboard**:
+   - Go to your Supabase project
+   - Navigate to "Table Editor"
+   - Your data should be visible there
+
+2. **Use Prisma Studio**:
+   ```bash
+   npx prisma studio
+   ```
+   - Opens a visual database browser
+   - Shows all your data
+
+3. **Query via API**:
+   - Your app's API routes will show data if it exists
+   - Check `/api/wallets`, `/api/transactions`, etc.
+
+### Best Practices for Production
+
+**Option 1: Manual Schema Updates (Current Approach)**
+- ✅ Simple and works well for small projects
+- ✅ You control when schema changes happen
+- ⚠️ Requires manual step when schema changes
+
+**Option 2: Prisma Migrations (Recommended for Production)**
+For better safety and version control:
+
+1. **Create a migration**:
+   ```bash
+   npx prisma migrate dev --name your_migration_name
+   ```
+
+2. **Apply migrations in production**:
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+3. **Benefits**:
+   - Version-controlled schema changes
+   - Can review changes before applying
+   - Rollback capability
+   - Better for team collaboration
 
 ## Supabase Connection Guide
 
@@ -258,6 +331,47 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 #### Migration Taking Too Long
 - **Use Direct Connection**: Switch to direct connection (port 5432) in `.env` for `prisma db push`
 - The pooler (port 6543) is slow for migrations but fast for application queries
+
+## PWA Icon Generation
+
+The app needs properly colored PNG icons for PWA installation. The logo SVG uses `currentColor` which renders as black when converted to PNG.
+
+### Quick Solution (Recommended)
+
+1. **Install sharp** (if not already installed):
+   ```bash
+   npm install --save-dev sharp
+   ```
+
+2. **Generate icons**:
+   ```bash
+   npm run generate-icons
+   ```
+
+This will generate:
+- `icon-192.png` (192x192)
+- `icon-512.png` (512x512)
+- `apple-icon-180.png` (180x180 for iOS)
+- `favicon-196.png` (196x196)
+
+### Alternative: Online Tool
+
+If you prefer not to install sharp, use an online tool:
+
+1. Go to https://realfavicongenerator.net/
+2. Upload `public/logo-icon.svg` (the colored version)
+3. Configure:
+   - Android Chrome: 192x192 and 512x512
+   - iOS: 180x180
+   - Favicon: 196x196
+4. Download and place the icons in the `public/` directory
+
+### Icon Files
+
+- `logo.svg` - Original logo with `currentColor` (for in-app use)
+- `logo-icon.svg` - Colored version with `#2563eb` stroke (for icon generation)
+
+The colored version ensures icons display properly when installed as a PWA.
 
 ## Future Enhancements
 
