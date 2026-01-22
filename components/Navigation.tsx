@@ -31,7 +31,7 @@ export default function Navigation() {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center" title="Finance Manager">
-                <Logo size={32} className="text-blue-600" />
+                <Logo size={40} className="text-blue-600" />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

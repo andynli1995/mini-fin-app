@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react'
 import { Lock, Unlock } from 'lucide-react'
-import Logo from './Logo'
 
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000 // 5 minutes
 
@@ -311,9 +310,6 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <Logo size={48} className="text-blue-600" />
-            </div>
             <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900">Set Up PIN</h1>
             <p className="text-gray-600 mt-2">Create a 4-6 digit PIN to secure your financial data</p>
@@ -453,9 +449,6 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
           <div className="text-center mb-6">
-            <div className="flex justify-center mb-4">
-              <Logo size={48} className="text-blue-600" />
-            </div>
             <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900">App Locked</h1>
             <p className="text-gray-600 mt-2">Enter your PIN to unlock</p>
