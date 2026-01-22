@@ -43,24 +43,48 @@ npm install
 ```
 
 2. Set up Supabase:
+   
+   **Create Supabase Project:**
    - Create a new project at [supabase.com](https://supabase.com)
-   - Go to Settings > Database > Connection Pooling
-   - Select "Transaction" mode and copy the connection string
+   - Sign up for a free account if needed
+   - Click "New Project"
+   - Enter project name and database password
+   - Select a region close to you
+   - Wait for the project to be created (~2 minutes)
+   
+   **Get Connection Strings:**
+   - Go to Supabase Dashboard → Settings → Database
+   - For **local development/migrations**: Copy the "Connection string" (URI) - direct connection (port 5432)
+   - For **Vercel/production**: Go to "Connection Pooling" → Select "Transaction" mode → Copy connection string (port 6543)
+   
+   **Set Up Environment Variables:**
    - Create a `.env` file in the root directory:
    ```bash
-   # For local development (use direct connection)
+   # For local development and migrations (direct connection)
    DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
    
-   # For Vercel/production (use connection pooler - port 6543)
+   # For Vercel/production (connection pooler - use this in Vercel environment variables)
    # DATABASE_URL="postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
    ```
-   - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
+   
+   **Important Notes:**
+   - Replace `[YOUR-PASSWORD]` with your database password
+   - Replace `[YOUR-PROJECT-REF]` with your project reference ID
+   - Replace `[REGION]` with your region (e.g., `us-east-1`, `eu-west-1`)
+   - The pooler URL MUST include `?pgbouncer=true&connection_limit=1`
+   - For migrations, use the direct connection (port 5432)
+   - For Vercel, use the pooler URL (port 6543)
 
 3. Set up the database:
-```bash
-npx prisma generate
-npx prisma db push
-```
+   
+   **Important**: For `prisma db push`, use the direct connection (port 5432) in your `.env` file, as the pooler is slow for migrations.
+   
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+   
+   After the schema is pushed, you can switch back to the pooler URL for your application.
 
 4. Run the development server:
 ```bash
@@ -164,6 +188,64 @@ mini-fin-app/
 - **Category**: Transaction categories organized by type
 - **Transaction**: Individual financial transactions linked to categories and wallets
 - **Subscription**: Recurring subscription information with due dates
+
+## Supabase Connection Guide
+
+### Connection String Formats
+
+**For Application/Vercel (Connection Pooler - RECOMMENDED):**
+```
+postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
+```
+- Use this for Vercel/production deployments
+- Port: 6543 (pooler)
+- Username format: `postgres.[PROJECT-REF]` (with dot)
+- **Required**: Must include `?pgbouncer=true&connection_limit=1`
+
+**For Local Development/Migrations (Direct Connection):**
+```
+postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
+```
+- Use this for local development and `prisma db push`
+- Port: 5432 (direct)
+- Username: `postgres` (no dot)
+
+### Vercel Deployment Setup
+
+1. Go to Vercel Project Settings → Environment Variables
+2. Add `DATABASE_URL` with the connection pooler URL (port 6543)
+3. Make sure it includes `?pgbouncer=true&connection_limit=1`
+4. Set for "Production" environment (or all environments)
+5. Redeploy after updating
+
+### Troubleshooting
+
+#### "Can't reach database server" Error
+- **Missing Query Parameters**: Connection string must include `?pgbouncer=true&connection_limit=1`
+- **Wrong Port**: Use port 6543 (pooler) for Vercel, not 5432 (direct)
+- **Check Pooling**: Ensure "Transaction" mode is enabled in Supabase Connection Pooling settings
+
+#### "Circuit breaker open" Error
+- **Wait 5-10 minutes** for the circuit breaker to reset
+- **Verify Connection String**: Use the exact string from Supabase Dashboard (don't construct manually)
+- **Check Format**: Username should be `postgres.[PROJECT-REF]` (with dot)
+- **Connection Limit**: Ensure `connection_limit=1` is in the URL
+
+#### "Authentication failed" Error
+- **Get Fresh Connection String**: Copy directly from Supabase Dashboard → Connection Pooling
+- **URL-Encode Password**: Special characters (`@`, `#`, `$`, `%`, `&`, `+`, `=`) must be URL-encoded
+  - `@` → `%40`, `#` → `%23`, `$` → `%24`, `%` → `%25`, `&` → `%26`, `+` → `%2B`, `=` → `%3D`
+- **Verify Password**: Check that password matches your Supabase database password
+- **Test Locally**: Try the connection string locally first with `npx prisma studio`
+
+#### "Table does not exist" Error
+- **Push Schema**: Run `npx prisma db push` to create tables
+- **Use Direct Connection**: For migrations, use the direct connection (port 5432) in your `.env`
+- **Verify Tables**: Check Supabase Dashboard → Table Editor to see if tables were created
+
+#### Migration Taking Too Long
+- **Use Direct Connection**: Switch to direct connection (port 5432) in `.env` for `prisma db push`
+- The pooler (port 6543) is slow for migrations but fast for application queries
 
 ## Future Enhancements
 
