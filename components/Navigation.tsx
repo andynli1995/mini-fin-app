@@ -38,7 +38,7 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
         {/* Lock button - always visible */}
         <button
           onClick={handleLock}
-          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           title="Lock App"
         >
           <Lock className="w-5 h-5" />
