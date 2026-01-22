@@ -93,6 +93,10 @@ export default async function Dashboard() {
     )
   } catch (error) {
     console.error('Database error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    const isDirectConnection = errorMessage.includes(':5432')
+    const isPoolerConnection = errorMessage.includes(':6543')
+    
     return (
       <div className="space-y-6">
         <div>
@@ -103,12 +107,48 @@ export default async function Dashboard() {
         </div>
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h2 className="text-lg font-semibold text-red-800 mb-2">Database Connection Error</h2>
-          <p className="text-red-700">
+          <p className="text-red-700 mb-4">
             Unable to connect to the database. Please check your connection settings.
           </p>
-          <p className="text-sm text-red-600 mt-2">
-            Error: {error instanceof Error ? error.message : 'Unknown error'}
-          </p>
+          
+          {isDirectConnection && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Using Direct Connection (Port 5432)</h3>
+              <p className="text-sm text-yellow-700 mb-2">
+                Your connection string is using the direct database connection (port 5432), which may not work on Vercel.
+              </p>
+              <p className="text-sm text-yellow-700 mb-2">
+                <strong>Solution:</strong> Update your Vercel environment variable to use the connection pooler (port 6543):
+              </p>
+              <ol className="text-sm text-yellow-700 list-decimal list-inside space-y-1 ml-2">
+                <li>Go to Supabase Dashboard → Settings → Database → Connection Pooling</li>
+                <li>Select "Transaction" mode</li>
+                <li>Copy the connection string (it will use port 6543)</li>
+                <li>Update <code className="bg-yellow-100 px-1 rounded">DATABASE_URL</code> in Vercel with this pooler URL</li>
+                <li>Make sure it includes <code className="bg-yellow-100 px-1 rounded">?pgbouncer=true&connection_limit=1</code></li>
+                <li>Redeploy your Vercel project</li>
+              </ol>
+            </div>
+          )}
+          
+          {isPoolerConnection && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Connection Pooler Issue</h3>
+              <p className="text-sm text-yellow-700 mb-2">
+                If you see "Circuit breaker open", wait 2-5 minutes and try again.
+              </p>
+              <p className="text-sm text-yellow-700">
+                Alternatively, try using the direct connection with IP allowlisting enabled in Supabase.
+              </p>
+            </div>
+          )}
+          
+          <details className="mt-4">
+            <summary className="text-sm text-red-600 cursor-pointer">Technical Details</summary>
+            <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto">
+              {errorMessage}
+            </pre>
+          </details>
         </div>
       </div>
     )
