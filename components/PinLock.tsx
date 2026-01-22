@@ -160,12 +160,21 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         e.preventDefault()
         if (isSettingUp) {
           if (showConfirm) {
-            handleConfirmPinInput(e.key)
+            if (confirmPin.length < 6) {
+              setConfirmPin(confirmPin + e.key)
+              setError('')
+            }
           } else {
-            handlePinInput(e.key)
+            if (pin.length < 6) {
+              setPin(pin + e.key)
+              setError('')
+            }
           }
         } else {
-          handlePinInput(e.key)
+          if (enteredPin.length < 6) {
+            setEnteredPin(enteredPin + e.key)
+            setError('')
+          }
         }
       }
       // Handle backspace/delete
@@ -173,21 +182,37 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         e.preventDefault()
         if (isSettingUp) {
           if (showConfirm) {
-            handleConfirmPinBackspace()
+            setConfirmPin(confirmPin.slice(0, -1))
           } else {
-            handleBackspace()
+            setPin(pin.slice(0, -1))
           }
         } else {
-          handleBackspace()
+          setEnteredPin(enteredPin.slice(0, -1))
         }
+        setError('')
       }
       // Handle Enter key
       else if (e.key === 'Enter') {
         e.preventDefault()
         if (isSettingUp) {
           if (showConfirm) {
-            if (confirmPin === pin && confirmPin.length >= 4) {
-              setupPin()
+            // Check if PINs match and are valid
+            const currentPin = pin
+            const currentConfirmPin = confirmPin
+            if (currentPin.length >= 4 && currentConfirmPin === currentPin) {
+              // Setup PIN
+              localStorage.setItem(PIN_STORAGE_KEY, currentPin)
+              localStorage.setItem(LOCK_STATE_KEY, 'false')
+              setHasPin(true)
+              setIsSettingUp(false)
+              setIsLocked(false)
+              setShowConfirm(false)
+              setPin('')
+              setConfirmPin('')
+              setError('')
+            } else if (currentConfirmPin.length === currentPin.length && currentConfirmPin !== currentPin) {
+              setError('PINs do not match. Please try again.')
+              setConfirmPin('')
             }
           } else {
             if (pin.length >= 4) {
@@ -196,8 +221,18 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
             }
           }
         } else {
-          if (enteredPin.length >= 4) {
-            unlockApp()
+          // Unlock app
+          const currentEnteredPin = enteredPin
+          const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
+          if (currentEnteredPin.length >= 4 && storedPin && currentEnteredPin === storedPin) {
+            setIsLocked(false)
+            localStorage.setItem(LOCK_STATE_KEY, 'false')
+            setEnteredPin('')
+            setError('')
+            resetInactivityTimer()
+          } else if (currentEnteredPin.length >= 4) {
+            setError('Incorrect PIN. Please try again.')
+            setEnteredPin('')
           }
         }
       }
@@ -207,6 +242,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLocked, isSettingUp, showConfirm, pin, confirmPin, enteredPin])
 
   if (isSettingUp) {
