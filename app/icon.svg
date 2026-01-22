@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <title>Finance App Logo - Coin Check</title>
+  <g stroke="#3b82f6" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="42" cy="42" r="26"/>
+    <path d="M32 42l8 8 18-18"/>
+    <path d="M60 62c5 2 10 3 16 3"/>
+    <path d="M76 65c-6 0-11-1-16-3"/>
+  </g>
+</svg>

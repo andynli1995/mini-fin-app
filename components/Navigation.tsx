@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Lock, Settings2 } from 'lucide-react'
 import { usePinLock } from './PinLock'
+import Logo from './Logo'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,12 +25,15 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">">
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Finance Manager</h1>
+              <Link href="/" className="flex items-center space-x-2">
+                <Logo size={28} className="text-blue-600" />
+                <h1 className="text-xl font-bold text-gray-900">Finance Manager</h1>
+              </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navItems.map((item) => {
