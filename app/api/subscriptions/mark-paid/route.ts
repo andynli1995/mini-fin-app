@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Store walletId in a variable to satisfy TypeScript (we've already checked it's not null)
+    const walletId = subscription.walletId
+
     // Calculate next due date
     const currentDueDate = new Date(subscription.nextDueDate)
     let nextDueDate: Date
@@ -78,14 +81,14 @@ export async function POST(request: NextRequest) {
           date: new Date(),
           note: `Subscription: ${subscription.serviceName}`,
           categoryId: category.id,
-          walletId: subscription.walletId,
+          walletId: walletId,
         },
       })
 
       // Recalculate wallet balance from all transactions
       // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
       const transactions = await tx.transaction.findMany({
-        where: { walletId: subscription.walletId },
+        where: { walletId: walletId },
       })
 
       let balance = new Prisma.Decimal(0)
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest) {
       }
 
       await tx.wallet.update({
-        where: { id: subscription.walletId },
+        where: { id: walletId },
         data: { balance },
       })
 
