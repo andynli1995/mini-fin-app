@@ -42,10 +42,28 @@
    - Copy the ENTIRE connection string including the query parameters
 
 6. **Push Database Schema**
+   
+   **Important**: For migrations (`prisma db push`), use the direct connection (port 5432), not the pooler.
+   
+   - Get the direct connection string from Supabase Dashboard → Settings → Database → Connection string (URI)
+   - Temporarily update your `.env` file with the direct connection:
+   ```bash
+   DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+   ```
+   
+   Then run:
    ```bash
    npx prisma generate
    npx prisma db push
    ```
+   
+   After the schema is pushed, you can switch back to the pooler URL for your application.
+   
+   **Alternative**: You can also use two different environment variables:
+   - `DATABASE_URL` - for application (pooler, port 6543)
+   - `DATABASE_URL_DIRECT` - for migrations (direct, port 5432)
+   
+   Then run: `DATABASE_URL=$(cat .env | grep DATABASE_URL_DIRECT | cut -d '=' -f2) npx prisma db push`
 
 ## Connection String Formats
 
