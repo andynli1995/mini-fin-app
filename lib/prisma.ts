@@ -13,6 +13,15 @@ export const prisma =
         url: process.env.DATABASE_URL,
       },
     },
+    // Connection pool settings for serverless environments
+    ...(process.env.DATABASE_URL?.includes('pooler') && {
+      // For connection pooler, reduce connection timeout
+      __internal: {
+        engine: {
+          connectTimeout: 10000, // 10 seconds
+        },
+      },
+    }),
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma

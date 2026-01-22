@@ -131,15 +131,34 @@ export default async function Dashboard() {
             </div>
           )}
           
-          {isPoolerConnection && (
+          {(isPoolerConnection || errorMessage.includes('Circuit breaker')) && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Connection Pooler Issue</h3>
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Circuit Breaker Open</h3>
               <p className="text-sm text-yellow-700 mb-2">
-                If you see &quot;Circuit breaker open&quot;, wait 2-5 minutes and try again.
+                Supabase has temporarily blocked connections due to too many failed attempts. This is a protection mechanism.
               </p>
-              <p className="text-sm text-yellow-700">
-                Alternatively, try using the direct connection with IP allowlisting enabled in Supabase.
+              <p className="text-sm text-yellow-700 mb-3">
+                <strong>Solutions:</strong>
               </p>
+              <ol className="text-sm text-yellow-700 list-decimal list-inside space-y-2 ml-2">
+                <li>
+                  <strong>Wait 5-10 minutes</strong> for the circuit breaker to reset automatically, then refresh the page
+                </li>
+                <li>
+                  <strong>Verify your connection string</strong> in Vercel:
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                    <li>Should use port <code className="bg-yellow-100 px-1 rounded">6543</code> (pooler), not 5432</li>
+                    <li>Should include <code className="bg-yellow-100 px-1 rounded">?pgbouncer=true&amp;connection_limit=1</code></li>
+                    <li>Username format: <code className="bg-yellow-100 px-1 rounded">postgres.[PROJECT-REF]</code></li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Get fresh connection string</strong> from Supabase Dashboard → Settings → Database → Connection Pooling → Transaction mode
+                </li>
+                <li>
+                  <strong>Reduce connection attempts</strong> by ensuring <code className="bg-yellow-100 px-1 rounded">connection_limit=1</code> is in your URL
+                </li>
+              </ol>
             </div>
           )}
           
