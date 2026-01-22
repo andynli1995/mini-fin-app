@@ -3,6 +3,8 @@ import SubscriptionsList from '@/components/SubscriptionsList'
 import SubscriptionForm from '@/components/SubscriptionForm'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SubscriptionsPage() {
   const subscriptions = await prisma.subscription.findMany({
     orderBy: { nextDueDate: 'asc' },

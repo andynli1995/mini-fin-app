@@ -3,6 +3,8 @@ import WalletsList from '@/components/WalletsList'
 import WalletForm from '@/components/WalletForm'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export default async function WalletsPage() {
   const wallets = await prisma.wallet.findMany({
     orderBy: { createdAt: 'desc' },

@@ -3,6 +3,8 @@ import TransactionsList from '@/components/TransactionsList'
 import TransactionForm from '@/components/TransactionForm'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export default async function TransactionsPage() {
   const transactions = await prisma.transaction.findMany({
     orderBy: { date: 'desc' },
