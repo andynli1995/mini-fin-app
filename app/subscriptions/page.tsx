@@ -37,8 +37,8 @@ export default async function SubscriptionsPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Subscriptions</h1>
-            <p className="mt-2 text-sm text-gray-600">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Subscriptions</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               Manage your recurring subscriptions and payments
             </p>
           </div>
