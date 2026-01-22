@@ -14,6 +14,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
   const [confirmPin, setConfirmPin] = useState('')
   const [enteredPin, setEnteredPin] = useState('')
   const [isSettingUp, setIsSettingUp] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -97,6 +98,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     setHasPin(true)
     setIsSettingUp(false)
     setIsLocked(false)
+    setShowConfirm(false)
     setPin('')
     setConfirmPin('')
     setError('')
@@ -157,7 +159,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
             <p className="text-gray-600 mt-2">Create a 4-6 digit PIN to secure your financial data</p>
           </div>
 
-          {confirmPin.length === 0 ? (
+          {!showConfirm ? (
             <>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -203,7 +205,8 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                 <button
                   onClick={() => {
                     if (pin.length >= 4) {
-                      // Already in confirm mode, just need to show confirm UI
+                      setShowConfirm(true)
+                      setError('')
                     }
                   }}
                   disabled={pin.length < 4}
