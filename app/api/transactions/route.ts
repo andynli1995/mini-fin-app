@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       // Calculate net from ALL transactions (including the new one)
       const newTransactionNet = type === 'income' 
         ? amountDecimal 
-        : amountDecimal.neg() // Negate for expense/lend/rent
+        : new Prisma.Decimal(0).minus(amountDecimal) // Negate for expense/lend/rent
       
       const netFromAll = netFromExisting.plus(newTransactionNet)
 
