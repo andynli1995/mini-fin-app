@@ -57,8 +57,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Sidebar */}
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 transition-colors">
+        {/* Page content - add left margin on desktop when sidebar is open */}
+        <main className={`flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 transition-all duration-300 ${
+          sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </div>
