@@ -188,6 +188,18 @@ mini-fin-app/
 - **Category**: Transaction categories organized by type
 - **Transaction**: Individual financial transactions linked to categories and wallets
 - **Subscription**: Recurring subscription information with due dates
+- **AppSettings**: Stores app settings like PIN hash and lock state
+
+## Data Safety
+
+**Your database data is safe!** 
+
+- ✅ Supabase is a persistent database - data is stored permanently
+- ✅ Schema changes are **NOT** applied automatically on Vercel deployments
+- ✅ Only `prisma generate` runs during build (creates Prisma Client)
+- ✅ `prisma db push` is **NOT** run automatically - you control when schema updates happen
+
+See [DATABASE_SAFETY.md](./DATABASE_SAFETY.md) for detailed information about data persistence and safety.
 
 ## Supabase Connection Guide
 
