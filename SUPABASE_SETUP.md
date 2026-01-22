@@ -77,25 +77,54 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 ## Troubleshooting
 
 ### Connection Errors on Vercel
-If you see "Can't reach database server" errors on Vercel:
 
-1. **Use Connection Pooler URL**: Make sure you're using the pooler URL (port 6543), not the direct connection (port 5432)
+#### "Can't reach database server" Error
+If you see this error, you're likely using the direct connection (port 5432) instead of the pooler:
+
+1. **Use Connection Pooler URL**: Make sure you're using the pooler URL (port 6543)
    - Pooler URL format: `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
    - Direct URL format: `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
 
-2. **Check Connection Pooling Settings**:
+#### "Authentication failed" Error
+If you see "Authentication failed" or "provided database credentials are not valid":
+
+1. **Get the Correct Connection String**:
    - Go to Supabase Dashboard > Settings > Database > Connection Pooling
-   - Make sure "Transaction" mode is enabled
-   - Copy the connection string from there
+   - Select "Transaction" mode (not Session mode)
+   - Click "Copy" to get the exact connection string
+   - **Do NOT manually construct it** - use the one Supabase provides
 
-3. **Verify Environment Variable**:
-   - In Vercel, go to Project Settings > Environment Variables
-   - Make sure `DATABASE_URL` is set correctly
-   - Redeploy after updating the environment variable
+2. **URL-Encode Special Characters in Password**:
+   - If your password contains special characters (`@`, `#`, `$`, `%`, `&`, `+`, `=`, etc.), they must be URL-encoded
+   - Common encodings:
+     - `@` → `%40`
+     - `#` → `%23`
+     - `$` → `%24`
+     - `%` → `%25`
+     - `&` → `%26`
+     - `+` → `%2B`
+     - `=` → `%3D`
+   - Example: If password is `P@ssw0rd#123`, use `P%40ssw0rd%23123`
 
-4. **IP Restrictions**: 
-   - The connection pooler doesn't require IP allowlisting
-   - If using direct connection, you may need to allow Vercel's IP ranges
+3. **Verify Password**:
+   - Double-check that the password in your connection string matches your Supabase database password
+   - You can reset it in Supabase Dashboard > Settings > Database > Database Password
+
+4. **Check Connection String Format**:
+   - The pooler connection string should have the format: `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@[POOLER-HOST]:6543/postgres?pgbouncer=true&connection_limit=1`
+   - Make sure there are no extra spaces or line breaks
+   - The username should be `postgres.[PROJECT-REF]` (with the dot), not just `postgres`
+
+5. **Verify Environment Variable in Vercel**:
+   - Go to Vercel Project Settings > Environment Variables
+   - Check that `DATABASE_URL` is set correctly
+   - Make sure it's set for "Production" environment (or all environments)
+   - After updating, trigger a new deployment
+
+6. **Test Connection Locally First**:
+   - Copy the connection string to your local `.env` file
+   - Test with: `npx prisma db pull` or `npx prisma studio`
+   - If it works locally but not on Vercel, double-check the Vercel environment variable
 
 ### Other Issues
 - **Schema errors**: Run `npx prisma generate` after schema changes
