@@ -82,25 +82,36 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Recalculate wallet balance from all transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const wallet = await tx.wallet.findUnique({
+        where: { id: subscription.walletId },
+      })
+
+      // Recalculate wallet balance: initial balance + sum(income) - sum(expense) - sum(lend) - sum(rent)
       const transactions = await tx.transaction.findMany({
         where: { walletId: subscription.walletId },
       })
 
-      let balance = new Prisma.Decimal(0)
+      // Calculate net from transactions
+      let netFromTransactions = new Prisma.Decimal(0)
       for (const t of transactions) {
         const amt = new Prisma.Decimal(t.amount)
         if (t.type === 'income') {
-          balance = balance.plus(amt)
+          netFromTransactions = netFromTransactions.plus(amt)
         } else {
-          // expense, lend, rent all subtract
-          balance = balance.minus(amt)
+          netFromTransactions = netFromTransactions.minus(amt)
         }
       }
 
+      // Calculate initial balance: stored balance - net from transactions
+      const storedBalance = new Prisma.Decimal(wallet!.balance)
+      const initialBalance = storedBalance.minus(netFromTransactions)
+      
+      // New balance = initial balance + net from all transactions
+      const newBalance = initialBalance.plus(netFromTransactions)
+
       await tx.wallet.update({
         where: { id: subscription.walletId },
-        data: { balance },
+        data: { balance: newBalance },
       })
 
       await tx.subscription.update({
