@@ -15,14 +15,18 @@ export default function NotificationService() {
   }, [])
 
   useEffect(() => {
-    if (!isSupported || permission !== 'granted') return
+    if (!isSupported) return
 
     // Request notification permission if not granted
     if (permission === 'default') {
       Notification.requestPermission().then((result) => {
         setPermission(result)
       })
+      return
     }
+
+    // Only proceed if permission is granted
+    if (permission !== 'granted') return
 
     // Set up periodic subscription checks
     const checkSubscriptions = async () => {
