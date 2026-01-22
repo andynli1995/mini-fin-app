@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Transaction, Category, Wallet } from '@prisma/client'
 import { format } from 'date-fns'
-import { ArrowUpRight, ArrowDownLeft, Trash2 } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, Trash2, Edit } from 'lucide-react'
+import TransactionForm from './TransactionForm'
 
 interface TransactionWithRelations extends Transaction {
   category: Category
@@ -11,9 +13,12 @@ interface TransactionWithRelations extends Transaction {
 
 interface TransactionsListProps {
   transactions: TransactionWithRelations[]
+  categories?: Category[]
+  wallets?: Wallet[]
 }
 
-export default function TransactionsList({ transactions }: TransactionsListProps) {
+export default function TransactionsList({ transactions, categories = [], wallets = [] }: TransactionsListProps) {
+  const [editingTransaction, setEditingTransaction] = useState<TransactionWithRelations | null>(null)
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'income':
@@ -86,12 +91,24 @@ export default function TransactionsList({ transactions }: TransactionsListProps
               maximumFractionDigits: 2,
             })}
           </p>
-          <button
-            onClick={() => handleDelete(transaction.id)}
-            className="mt-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="flex space-x-2 mt-2">
+            {categories.length > 0 && wallets.length > 0 && (
+              <button
+                onClick={() => setEditingTransaction(transaction)}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                title="Edit transaction"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
+            <button
+              onClick={() => handleDelete(transaction.id)}
+              className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+              title="Delete transaction"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -175,12 +192,24 @@ export default function TransactionsList({ transactions }: TransactionsListProps
                     {transaction.note || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleDelete(transaction.id)}
-                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex justify-end space-x-2">
+                      {categories.length > 0 && wallets.length > 0 && (
+                        <button
+                          onClick={() => setEditingTransaction(transaction)}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                          title="Edit transaction"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(transaction.id)}
+                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                        title="Delete transaction"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -201,6 +230,14 @@ export default function TransactionsList({ transactions }: TransactionsListProps
           ))
         )}
       </div>
+      {editingTransaction && categories.length > 0 && wallets.length > 0 && (
+        <TransactionForm
+          categories={categories}
+          wallets={wallets}
+          transaction={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+        />
+      )}
     </div>
   )
 }

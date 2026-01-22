@@ -51,7 +51,11 @@ export default async function TransactionsPage() {
             <TransactionForm categories={categories} wallets={walletsWithNumbers} />
           </div>
         </div>
-        <TransactionsList transactions={transactionsWithNumbers} />
+        <TransactionsList 
+          transactions={transactionsWithNumbers} 
+          categories={categories}
+          wallets={walletsWithNumbers}
+        />
       </div>
     </Layout>
   )

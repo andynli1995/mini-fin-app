@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Wallet } from '@prisma/client'
 import Link from 'next/link'
 import { Trash2, Edit } from 'lucide-react'
+import WalletForm from './WalletForm'
 
 interface WalletWithCount extends Wallet {
   _count: {
@@ -15,6 +17,7 @@ interface WalletsListProps {
 }
 
 export default function WalletsList({ wallets }: WalletsListProps) {
+  const [editingWallet, setEditingWallet] = useState<WalletWithCount | null>(null)
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this wallet? All associated transactions will also be deleted.')) return
 
@@ -59,8 +62,16 @@ export default function WalletsList({ wallets }: WalletsListProps) {
               </div>
               <div className="flex space-x-2 flex-shrink-0 ml-2">
                 <button
+                  onClick={() => setEditingWallet(wallet)}
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                  title="Edit wallet"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
                   onClick={() => handleDelete(wallet.id)}
                   className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                  title="Delete wallet"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -88,6 +99,12 @@ export default function WalletsList({ wallets }: WalletsListProps) {
           </div>
         )}
       </div>
+      {editingWallet && (
+        <WalletForm
+          wallet={editingWallet}
+          onClose={() => setEditingWallet(null)}
+        />
+      )}
     </div>
   )
 }

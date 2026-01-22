@@ -1,26 +1,51 @@
 'use client'
 
-import { useState } from 'react'
-import { Wallet } from '@prisma/client'
+import { useState, useEffect } from 'react'
+import { Wallet, Subscription } from '@prisma/client'
 import { Plus, X } from 'lucide-react'
 import { addMonths, addWeeks, addDays, addYears } from 'date-fns'
 
-interface SubscriptionFormProps {
-  wallets: Wallet[]
+interface SubscriptionWithWallet extends Subscription {
+  wallet: Wallet | null
 }
 
-export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
-  const [isOpen, setIsOpen] = useState(false)
+interface SubscriptionFormProps {
+  wallets: Wallet[]
+  subscription?: SubscriptionWithWallet
+  onClose?: () => void
+}
+
+export default function SubscriptionForm({ wallets, subscription, onClose }: SubscriptionFormProps) {
+  const [isOpen, setIsOpen] = useState(!!subscription)
   const [formData, setFormData] = useState({
     serviceName: '',
     amount: '',
     period: 'monthly',
     startDate: new Date().toISOString().split('T')[0],
+    nextDueDate: '',
     paymentMethod: '',
     walletId: '',
     note: '',
+    isActive: true,
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (subscription) {
+      setFormData({
+        serviceName: subscription.serviceName,
+        amount: subscription.amount.toString(),
+        period: subscription.period,
+        startDate: new Date(subscription.startDate).toISOString().split('T')[0],
+        nextDueDate: new Date(subscription.nextDueDate).toISOString().split('T')[0],
+        paymentMethod: subscription.paymentMethod || '',
+        walletId: subscription.walletId || '',
+        note: subscription.note || '',
+        isActive: subscription.isActive,
+      })
+      setIsOpen(true)
+    }
+  }, [subscription])
 
   const calculateNextDueDate = (startDate: string, period: string) => {
     const start = new Date(startDate)
@@ -47,10 +72,16 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
 
     setIsSubmitting(true)
     try {
-      const nextDueDate = calculateNextDueDate(formData.startDate, formData.period)
+      const url = subscription ? `/api/subscriptions/${subscription.id}` : '/api/subscriptions'
+      const method = subscription ? 'PUT' : 'POST'
+      
+      // For new subscriptions, calculate next due date. For edits, use the provided one.
+      const nextDueDate = subscription && formData.nextDueDate
+        ? new Date(formData.nextDueDate)
+        : calculateNextDueDate(formData.startDate, formData.period)
 
-      const response = await fetch('/api/subscriptions', {
-        method: 'POST',
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -62,13 +93,16 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
       })
 
       if (response.ok) {
+        if (onClose) {
+          onClose()
+        }
         window.location.reload()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to create subscription')
+        alert(error.error || `Failed to ${subscription ? 'update' : 'create'} subscription`)
       }
     } catch (error) {
-      alert('Failed to create subscription')
+      alert(`Failed to ${subscription ? 'update' : 'create'} subscription`)
     } finally {
       setIsSubmitting(false)
     }
@@ -90,10 +124,13 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 m-4 sm:m-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Subscription</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{subscription ? 'Edit Subscription' : 'Add Subscription'}</h3>
           <button
-            onClick={() => setIsOpen(false)}
-            className="text-gray-400 hover:text-gray-600"
+            onClick={() => {
+              setIsOpen(false)
+              if (onClose) onClose()
+            }}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -149,6 +186,19 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
             />
           </div>
 
+          {subscription && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Next Due Date</label>
+              <input
+                type="date"
+                value={formData.nextDueDate}
+                onChange={(e) => setFormData({ ...formData, nextDueDate: e.target.value })}
+                className="mt-1 block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                required
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
             <input
@@ -186,18 +236,36 @@ export default function SubscriptionForm({ wallets }: SubscriptionFormProps) {
             />
           </div>
 
+          {subscription && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Active
+              </label>
+            </div>
+          )}
+
           <div className="flex space-x-3">
             <button
               type="submit"
               disabled={isSubmitting}
               className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? 'Saving...' : 'Save'}
+              {isSubmitting ? (subscription ? 'Updating...' : 'Saving...') : (subscription ? 'Update' : 'Save')}
             </button>
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
-              className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
+              onClick={() => {
+                setIsOpen(false)
+                if (onClose) onClose()
+              }}
+              className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               Cancel
             </button>

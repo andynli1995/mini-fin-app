@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import { Subscription, Wallet } from '@prisma/client'
 import { format, differenceInDays } from 'date-fns'
-import { Calendar, AlertCircle, Trash2, CheckCircle } from 'lucide-react'
+import { Calendar, AlertCircle, Trash2, CheckCircle, Edit } from 'lucide-react'
+import SubscriptionForm from './SubscriptionForm'
 
 interface SubscriptionWithWallet extends Subscription {
   wallet: Wallet | null
@@ -14,6 +16,7 @@ interface SubscriptionsListProps {
 }
 
 export default function SubscriptionsList({ subscriptions, wallets }: SubscriptionsListProps) {
+  const [editingSubscription, setEditingSubscription] = useState<SubscriptionWithWallet | null>(null)
   const getDaysUntilDue = (date: Date) => {
     return differenceInDays(new Date(date), new Date())
   }
@@ -123,6 +126,13 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
             )}
           </div>
           <div className="flex flex-col gap-2 ml-4">
+            <button
+              onClick={() => setEditingSubscription(subscription)}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+              title="Edit subscription"
+            >
+              <Edit className="w-5 h-5" />
+            </button>
             {subscription.isActive && subscription.walletId && (
               <button
                 onClick={() => handleMarkPaid(subscription)}
@@ -135,6 +145,7 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
             <button
               onClick={() => handleDelete(subscription.id)}
               className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+              title="Delete subscription"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -241,6 +252,13 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => setEditingSubscription(subscription)}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                          title="Edit subscription"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
                         {subscription.isActive && subscription.walletId && (
                           <button
                             onClick={() => handleMarkPaid(subscription)}
@@ -253,6 +271,7 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
                         <button
                           onClick={() => handleDelete(subscription.id)}
                           className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                          title="Delete subscription"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -278,6 +297,13 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
           ))
         )}
       </div>
+      {editingSubscription && (
+        <SubscriptionForm
+          wallets={wallets}
+          subscription={editingSubscription}
+          onClose={() => setEditingSubscription(null)}
+        />
+      )}
     </div>
   )
 }

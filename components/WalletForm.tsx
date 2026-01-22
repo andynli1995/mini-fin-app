@@ -1,10 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Plus, X } from 'lucide-react'
 
-export default function WalletForm() {
-  const [isOpen, setIsOpen] = useState(false)
+interface Wallet {
+  id: string
+  name: string
+  type: string
+  currency: string
+  balance: number
+}
+
+interface WalletFormProps {
+  wallet?: Wallet
+  onClose?: () => void
+}
+
+export default function WalletForm({ wallet, onClose }: WalletFormProps) {
+  const [isOpen, setIsOpen] = useState(!!wallet)
   const [formData, setFormData] = useState({
     name: '',
     type: '',
@@ -12,6 +25,18 @@ export default function WalletForm() {
     balance: '0',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (wallet) {
+      setFormData({
+        name: wallet.name,
+        type: wallet.type,
+        currency: wallet.currency,
+        balance: wallet.balance.toString(),
+      })
+      setIsOpen(true)
+    }
+  }, [wallet])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,8 +47,11 @@ export default function WalletForm() {
 
     setIsSubmitting(true)
     try {
-      const response = await fetch('/api/wallets', {
-        method: 'POST',
+      const url = wallet ? `/api/wallets/${wallet.id}` : '/api/wallets'
+      const method = wallet ? 'PUT' : 'POST'
+      
+      const response = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
@@ -32,13 +60,16 @@ export default function WalletForm() {
       })
 
       if (response.ok) {
+        if (onClose) {
+          onClose()
+        }
         window.location.reload()
       } else {
         const error = await response.json()
-        alert(error.error || 'Failed to create wallet')
+        alert(error.error || `Failed to ${wallet ? 'update' : 'create'} wallet`)
       }
     } catch (error) {
-      alert('Failed to create wallet')
+      alert(`Failed to ${wallet ? 'update' : 'create'} wallet`)
     } finally {
       setIsSubmitting(false)
     }
@@ -60,10 +91,13 @@ export default function WalletForm() {
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
       <div className="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-full max-w-md sm:w-96 shadow-lg rounded-md bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 m-4 sm:m-auto">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Add Wallet</h3>
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{wallet ? 'Edit Wallet' : 'Add Wallet'}</h3>
           <button
-            onClick={() => setIsOpen(false)}
-            className="text-gray-400 hover:text-gray-600"
+            onClick={() => {
+              setIsOpen(false)
+              if (onClose) onClose()
+            }}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -125,12 +159,15 @@ export default function WalletForm() {
               disabled={isSubmitting}
               className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? 'Saving...' : 'Save'}
+              {isSubmitting ? (wallet ? 'Updating...' : 'Saving...') : (wallet ? 'Update' : 'Save')}
             </button>
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
-              className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300"
+              onClick={() => {
+                setIsOpen(false)
+                if (onClose) onClose()
+              }}
+              className="flex-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               Cancel
             </button>
