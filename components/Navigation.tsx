@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Lock } from 'lucide-react'
+import { usePinLock } from './PinLock'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -15,10 +16,10 @@ const navItems = [
 
 export default function Navigation() {
   const pathname = usePathname()
+  const { lockApp } = usePinLock()
 
   const handleLock = () => {
-    localStorage.setItem('app_locked', 'true')
-    window.location.reload()
+    lockApp()
   }
 
   return (

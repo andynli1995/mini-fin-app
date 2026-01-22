@@ -1,11 +1,24 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, createContext, useContext } from 'react'
 import { Lock, Unlock } from 'lucide-react'
 
-const PIN_STORAGE_KEY = 'app_pin'
-const LOCK_STATE_KEY = 'app_locked'
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000 // 5 minutes
+
+interface PinLockContextType {
+  lockApp: () => void
+  isLocked: boolean
+}
+
+const PinLockContext = createContext<PinLockContextType | undefined>(undefined)
+
+export function usePinLock() {
+  const context = useContext(PinLockContext)
+  if (!context) {
+    throw new Error('usePinLock must be used within PinLock')
+  }
+  return context
+}
 
 export default function PinLock({ children }: { children: React.ReactNode }) {
   const [isLocked, setIsLocked] = useState(false)
@@ -16,13 +29,46 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
   const [isSettingUp, setIsSettingUp] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  const lockApp = useCallback(() => {
-    setIsLocked(true)
-    localStorage.setItem(LOCK_STATE_KEY, 'true')
-    setEnteredPin('')
-    setError('')
+  // Fetch PIN status from database
+  useEffect(() => {
+    const fetchPinStatus = async () => {
+      try {
+        const response = await fetch('/api/settings/pin')
+        if (response.ok) {
+          const data = await response.json()
+          setHasPin(data.hasPin)
+          setIsLocked(data.isLocked || false)
+          setIsSettingUp(!data.hasPin)
+        }
+      } catch (error) {
+        console.error('Error fetching PIN status:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPinStatus()
+  }, [])
+
+  const lockApp = useCallback(async () => {
+    try {
+      await fetch('/api/settings/pin', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isLocked: true }),
+      })
+      setIsLocked(true)
+      setEnteredPin('')
+      setError('')
+    } catch (error) {
+      console.error('Error locking app:', error)
+      setIsLocked(true)
+      setEnteredPin('')
+      setError('')
+    }
   }, [])
 
   const resetInactivityTimer = useCallback(() => {
@@ -34,38 +80,47 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     }, INACTIVITY_TIMEOUT)
   }, [lockApp])
 
-  const unlockApp = useCallback(() => {
-    const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
-    if (enteredPin === storedPin) {
-      setIsLocked(false)
-      localStorage.setItem(LOCK_STATE_KEY, 'false')
-      setEnteredPin('')
-      setError('')
-      resetInactivityTimer()
-    } else {
-      setError('Incorrect PIN. Please try again.')
+  const unlockApp = useCallback(async () => {
+    if (enteredPin.length < 4) {
+      setError('PIN must be at least 4 digits')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/settings/pin', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: enteredPin, isLocked: false }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setIsLocked(false)
+        setEnteredPin('')
+        setError('')
+        resetInactivityTimer()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Incorrect PIN. Please try again.')
+        setEnteredPin('')
+      }
+    } catch (error) {
+      console.error('Error unlocking app:', error)
+      setError('Failed to unlock. Please try again.')
       setEnteredPin('')
     }
   }, [enteredPin, resetInactivityTimer])
 
   useEffect(() => {
-    // Check if PIN exists
-    const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
-    const locked = localStorage.getItem(LOCK_STATE_KEY) === 'true'
-    
-    setHasPin(!!storedPin)
-    setIsLocked(locked)
-    setIsSettingUp(!storedPin)
-
     // Set up inactivity timer
-    if (storedPin && !locked) {
+    if (hasPin && !isLocked && !isSettingUp) {
       resetInactivityTimer()
     }
 
     // Listen for user activity
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart']
     const resetTimer = () => {
-      if (!isLocked && hasPin) {
+      if (!isLocked && hasPin && !isSettingUp) {
         resetInactivityTimer()
       }
     }
@@ -82,9 +137,9 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         clearTimeout(inactivityTimerRef.current)
       }
     }
-  }, [isLocked, hasPin, resetInactivityTimer])
+  }, [isLocked, hasPin, isSettingUp, resetInactivityTimer])
 
-  const setupPin = () => {
+  const setupPin = async () => {
     if (pin.length < 4) {
       setError('PIN must be at least 4 digits')
       return
@@ -93,15 +148,31 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       setError('PINs do not match')
       return
     }
-    localStorage.setItem(PIN_STORAGE_KEY, pin)
-    localStorage.setItem(LOCK_STATE_KEY, 'false')
-    setHasPin(true)
-    setIsSettingUp(false)
-    setIsLocked(false)
-    setShowConfirm(false)
-    setPin('')
-    setConfirmPin('')
-    setError('')
+
+    try {
+      const response = await fetch('/api/settings/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      })
+
+      if (response.ok) {
+        setHasPin(true)
+        setIsSettingUp(false)
+        setIsLocked(false)
+        setShowConfirm(false)
+        setPin('')
+        setConfirmPin('')
+        setError('')
+        resetInactivityTimer()
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to set PIN. Please try again.')
+      }
+    } catch (error) {
+      console.error('Error setting PIN:', error)
+      setError('Failed to set PIN. Please try again.')
+    }
   }
 
   const handlePinInput = (digit: string) => {
@@ -139,13 +210,16 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     setError('')
   }
 
-  // Auto-submit when PIN is complete (for unlock) - only when length matches stored PIN
+  // Auto-submit when PIN is complete (for unlock)
   useEffect(() => {
-    if (!isSettingUp && enteredPin.length >= 4) {
-      const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
-      if (storedPin && enteredPin.length === storedPin.length && enteredPin === storedPin) {
-        unlockApp()
-      }
+    if (!isSettingUp && enteredPin.length >= 4 && enteredPin.length <= 6) {
+      // Try to unlock when PIN length is reasonable
+      const timer = setTimeout(() => {
+        if (enteredPin.length >= 4) {
+          unlockApp()
+        }
+      }, 300) // Small delay to allow user to continue typing
+      return () => clearTimeout(timer)
     }
   }, [enteredPin, isSettingUp, unlockApp])
 
@@ -196,21 +270,9 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         e.preventDefault()
         if (isSettingUp) {
           if (showConfirm) {
-            // Check if PINs match and are valid
-            const currentPin = pin
-            const currentConfirmPin = confirmPin
-            if (currentPin.length >= 4 && currentConfirmPin === currentPin) {
-              // Setup PIN
-              localStorage.setItem(PIN_STORAGE_KEY, currentPin)
-              localStorage.setItem(LOCK_STATE_KEY, 'false')
-              setHasPin(true)
-              setIsSettingUp(false)
-              setIsLocked(false)
-              setShowConfirm(false)
-              setPin('')
-              setConfirmPin('')
-              setError('')
-            } else if (currentConfirmPin.length === currentPin.length && currentConfirmPin !== currentPin) {
+            if (confirmPin === pin && confirmPin.length >= 4) {
+              setupPin()
+            } else if (confirmPin.length === pin.length && confirmPin !== pin) {
               setError('PINs do not match. Please try again.')
               setConfirmPin('')
             }
@@ -221,18 +283,8 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
             }
           }
         } else {
-          // Unlock app
-          const currentEnteredPin = enteredPin
-          const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
-          if (currentEnteredPin.length >= 4 && storedPin && currentEnteredPin === storedPin) {
-            setIsLocked(false)
-            localStorage.setItem(LOCK_STATE_KEY, 'false')
-            setEnteredPin('')
-            setError('')
-            resetInactivityTimer()
-          } else if (currentEnteredPin.length >= 4) {
-            setError('Incorrect PIN. Please try again.')
-            setEnteredPin('')
+          if (enteredPin.length >= 4) {
+            unlockApp()
           }
         }
       }
@@ -244,6 +296,14 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLocked, isSettingUp, showConfirm, pin, confirmPin, enteredPin])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    )
+  }
 
   if (isSettingUp) {
     return (
@@ -356,20 +416,20 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                 >
                   0
                 </button>
-            <button
-              onClick={() => {
-                if (confirmPin === pin && confirmPin.length >= 4) {
-                  setupPin()
-                } else if (confirmPin.length === pin.length && confirmPin !== pin) {
-                  setError('PINs do not match. Please try again.')
-                  setConfirmPin('')
-                }
-              }}
-              disabled={confirmPin.length < 4 || confirmPin.length !== pin.length}
-              className="py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
-            >
-              ✓
-            </button>
+                <button
+                  onClick={() => {
+                    if (confirmPin === pin && confirmPin.length >= 4) {
+                      setupPin()
+                    } else if (confirmPin.length === pin.length && confirmPin !== pin) {
+                      setError('PINs do not match. Please try again.')
+                      setConfirmPin('')
+                    }
+                  }}
+                  disabled={confirmPin.length < 4 || confirmPin.length !== pin.length}
+                  className="py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
+                >
+                  ✓
+                </button>
               </div>
             </>
           )}
@@ -452,5 +512,9 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
     )
   }
 
-  return <>{children}</>
+  return (
+    <PinLockContext.Provider value={{ lockApp, isLocked }}>
+      {children}
+    </PinLockContext.Provider>
+  )
 }
