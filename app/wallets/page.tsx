@@ -15,6 +15,12 @@ export default async function WalletsPage() {
     },
   })
 
+  // Convert Decimal to number for Client Components
+  const walletsWithNumbers = wallets.map((wallet) => ({
+    ...wallet,
+    balance: Number(wallet.balance),
+  }))
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -29,7 +35,7 @@ export default async function WalletsPage() {
             <WalletForm />
           </div>
         </div>
-        <WalletsList wallets={wallets} />
+        <WalletsList wallets={walletsWithNumbers} />
       </div>
     </Layout>
   )

@@ -17,6 +17,21 @@ export default async function SubscriptionsPage() {
     orderBy: { name: 'asc' },
   })
 
+  // Convert Decimal to number for Client Components
+  const subscriptionsWithNumbers = subscriptions.map((subscription) => ({
+    ...subscription,
+    amount: Number(subscription.amount),
+    wallet: subscription.wallet ? {
+      ...subscription.wallet,
+      balance: Number(subscription.wallet.balance),
+    } : null,
+  }))
+
+  const walletsWithNumbers = wallets.map((wallet) => ({
+    ...wallet,
+    balance: Number(wallet.balance),
+  }))
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -28,10 +43,10 @@ export default async function SubscriptionsPage() {
             </p>
           </div>
           <div className="flex-shrink-0">
-            <SubscriptionForm wallets={wallets} />
+            <SubscriptionForm wallets={walletsWithNumbers} />
           </div>
         </div>
-        <SubscriptionsList subscriptions={subscriptions} wallets={wallets} />
+        <SubscriptionsList subscriptions={subscriptionsWithNumbers} wallets={walletsWithNumbers} />
       </div>
     </Layout>
   )

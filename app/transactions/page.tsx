@@ -22,6 +22,21 @@ export default async function TransactionsPage() {
     orderBy: { name: 'asc' },
   })
 
+  // Convert Decimal to number for Client Components
+  const transactionsWithNumbers = transactions.map((transaction) => ({
+    ...transaction,
+    amount: Number(transaction.amount),
+    wallet: {
+      ...transaction.wallet,
+      balance: Number(transaction.wallet.balance),
+    },
+  }))
+
+  const walletsWithNumbers = wallets.map((wallet) => ({
+    ...wallet,
+    balance: Number(wallet.balance),
+  }))
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -33,10 +48,10 @@ export default async function TransactionsPage() {
             </p>
           </div>
           <div className="flex-shrink-0">
-            <TransactionForm categories={categories} wallets={wallets} />
+            <TransactionForm categories={categories} wallets={walletsWithNumbers} />
           </div>
         </div>
-        <TransactionsList transactions={transactions} />
+        <TransactionsList transactions={transactionsWithNumbers} />
       </div>
     </Layout>
   )

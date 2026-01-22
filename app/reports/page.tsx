@@ -21,6 +21,21 @@ export default async function ReportsPage() {
     orderBy: { name: 'asc' },
   })
 
+  // Convert Decimal to number for Client Components
+  const transactionsWithNumbers = transactions.map((transaction) => ({
+    ...transaction,
+    amount: Number(transaction.amount),
+    wallet: {
+      ...transaction.wallet,
+      balance: Number(transaction.wallet.balance),
+    },
+  }))
+
+  const walletsWithNumbers = wallets.map((wallet) => ({
+    ...wallet,
+    balance: Number(wallet.balance),
+  }))
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -31,9 +46,9 @@ export default async function ReportsPage() {
           </p>
         </div>
         <ReportsView
-          transactions={transactions}
+          transactions={transactionsWithNumbers}
           categories={categories}
-          wallets={wallets}
+          wallets={walletsWithNumbers}
         />
       </div>
     </Layout>

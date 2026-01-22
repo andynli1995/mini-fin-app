@@ -41,6 +41,16 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
       orderBy: { date: 'desc' },
     })
 
+    // Convert Decimal to number for Client Components
+    const transactionsWithNumbers = transactions.map((transaction) => ({
+      ...transaction,
+      amount: Number(transaction.amount),
+      wallet: {
+        ...transaction.wallet,
+        balance: Number(transaction.wallet.balance),
+      },
+    }))
+
     const formattedBalance = Number(wallet.balance).toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
@@ -79,7 +89,7 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
           {/* Transactions Section */}
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Transactions</h2>
-            <TransactionsList transactions={transactions} />
+            <TransactionsList transactions={transactionsWithNumbers} />
           </div>
         </div>
       </Layout>

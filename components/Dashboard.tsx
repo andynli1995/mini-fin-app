@@ -11,7 +11,13 @@ export default async function Dashboard() {
       orderBy: { createdAt: 'desc' },
     })
 
-    const totalBalance = wallets.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
+    // Convert Decimal to number for Client Components
+    const walletsWithNumbers = wallets.map((wallet) => ({
+      ...wallet,
+      balance: Number(wallet.balance),
+    }))
+
+    const totalBalance = walletsWithNumbers.reduce((sum, wallet) => sum + wallet.balance, 0)
 
     const recentTransactions = await prisma.transaction.findMany({
       take: 5,
@@ -21,6 +27,16 @@ export default async function Dashboard() {
         wallet: true,
       },
     })
+
+    // Convert Decimal to number for Client Components
+    const recentTransactionsWithNumbers = recentTransactions.map((transaction) => ({
+      ...transaction,
+      amount: Number(transaction.amount),
+      wallet: transaction.wallet ? {
+        ...transaction.wallet,
+        balance: Number(transaction.wallet.balance),
+      } : null,
+    }))
 
     const upcomingSubscriptions = await prisma.subscription.findMany({
       where: {
@@ -47,6 +63,25 @@ export default async function Dashboard() {
       },
     })
 
+    // Convert Decimal to number for Client Components
+    const upcomingSubscriptionsWithNumbers = upcomingSubscriptions.map((subscription) => ({
+      ...subscription,
+      amount: Number(subscription.amount),
+      wallet: subscription.wallet ? {
+        ...subscription.wallet,
+        balance: Number(subscription.wallet.balance),
+      } : null,
+    }))
+
+    const allActiveSubscriptionsWithNumbers = allActiveSubscriptions.map((subscription) => ({
+      ...subscription,
+      amount: Number(subscription.amount),
+      wallet: subscription.wallet ? {
+        ...subscription.wallet,
+        balance: Number(subscription.wallet.balance),
+      } : null,
+    }))
+
     // Get settings for default balance visibility
     const settings = await prisma.appSettings.findFirst()
 
@@ -60,7 +95,7 @@ export default async function Dashboard() {
         </div>
 
         {/* Reminders Banner */}
-        <RemindersBanner subscriptions={allActiveSubscriptions} />
+        <RemindersBanner subscriptions={allActiveSubscriptionsWithNumbers} />
 
         {/* Total Balance Card */}
         <BalanceDisplay
@@ -73,14 +108,14 @@ export default async function Dashboard() {
         <div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Wallets</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {wallets.map((wallet) => (
+            {walletsWithNumbers.map((wallet) => (
               <WalletCard
                 key={wallet.id}
                 wallet={wallet}
                 defaultHidden={settings?.hideBalancesByDefault || false}
               />
             ))}
-            {wallets.length === 0 && (
+            {walletsWithNumbers.length === 0 && (
               <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
                 No wallets yet. Create your first wallet to get started.
               </div>
@@ -90,10 +125,10 @@ export default async function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Transactions */}
-          <RecentTransactions transactions={recentTransactions} />
+          <RecentTransactions transactions={recentTransactionsWithNumbers} />
 
           {/* Upcoming Subscriptions */}
-          <UpcomingSubscriptions subscriptions={upcomingSubscriptions} />
+          <UpcomingSubscriptions subscriptions={upcomingSubscriptionsWithNumbers} />
         </div>
       </div>
     )
