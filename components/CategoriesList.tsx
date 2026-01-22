@@ -1,7 +1,5 @@
 'use client'
 
-'use client'
-
 import { useState } from 'react'
 import { Category } from '@prisma/client'
 import { Trash2, Edit } from 'lucide-react'

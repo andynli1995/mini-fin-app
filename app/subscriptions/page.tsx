@@ -1,17 +1,37 @@
 import Layout from '@/components/Layout'
 import SubscriptionsList from '@/components/SubscriptionsList'
 import SubscriptionForm from '@/components/SubscriptionForm'
+import Pagination from '@/components/Pagination'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function SubscriptionsPage() {
+interface SubscriptionsPageProps {
+  searchParams: {
+    page?: string
+  }
+}
+
+const ITEMS_PER_PAGE = 20
+
+export default async function SubscriptionsPage({ searchParams }: SubscriptionsPageProps) {
+  const currentPage = parseInt(searchParams.page || '1', 10)
+  const skip = (currentPage - 1) * ITEMS_PER_PAGE
+
+  // Get total count for pagination
+  const totalCount = await prisma.subscription.count()
+
+  // Get paginated subscriptions
   const subscriptions = await prisma.subscription.findMany({
+    skip,
+    take: ITEMS_PER_PAGE,
     orderBy: { nextDueDate: 'asc' },
     include: {
       wallet: true,
     },
   })
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   const wallets = await prisma.wallet.findMany({
     orderBy: { name: 'asc' },
@@ -46,7 +66,16 @@ export default async function SubscriptionsPage() {
             <SubscriptionForm wallets={walletsWithNumbers} />
           </div>
         </div>
-        <SubscriptionsList subscriptions={subscriptionsWithNumbers} wallets={walletsWithNumbers} />
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg border border-gray-200 dark:border-slate-700">
+          <SubscriptionsList subscriptions={subscriptionsWithNumbers} wallets={walletsWithNumbers} />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalCount}
+            itemsPerPage={ITEMS_PER_PAGE}
+            basePath="/subscriptions"
+          />
+        </div>
       </div>
     </Layout>
   )

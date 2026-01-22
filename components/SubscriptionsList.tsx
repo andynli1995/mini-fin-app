@@ -156,7 +156,7 @@ export default function SubscriptionsList({ subscriptions, wallets }: Subscripti
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg overflow-hidden border border-gray-200 dark:border-slate-700">
+    <div className="overflow-hidden">
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
