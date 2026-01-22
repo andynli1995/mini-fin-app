@@ -22,12 +22,19 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
 
+  // Only close sidebar on mobile when clicking a link
+  const handleLinkClick = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      onClose()
+    }
+  }
+
   return (
     <>
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - starts below header */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed top-16 left-0 right-0 bottom-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -64,7 +71,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={onClose}
+                    onClick={handleLinkClick}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                       isActive
                         ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500'
