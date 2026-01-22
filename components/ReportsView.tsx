@@ -155,8 +155,8 @@ export default function ReportsView({
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Filters</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Filters</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
@@ -221,35 +221,35 @@ export default function ReportsView({
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Income</p>
-          <p className="text-xl sm:text-2xl font-bold text-green-600 mt-1">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Income</p>
+          <p className="text-xl sm:text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
             ${totals.income.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Expense</p>
-          <p className="text-xl sm:text-2xl font-bold text-red-600 mt-1">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Expense</p>
+          <p className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400 mt-1">
             ${totals.expense.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Lend</p>
-          <p className="text-xl sm:text-2xl font-bold text-yellow-600 mt-1">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Lend</p>
+          <p className="text-xl sm:text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">
             ${totals.lend.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Total Rent</p>
-          <p className="text-xl sm:text-2xl font-bold text-blue-600 mt-1">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Total Rent</p>
+          <p className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">
             ${totals.rent.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Net Balance</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Net Balance</p>
           <p
             className={`text-xl sm:text-2xl font-bold mt-1 ${
-              totals.net >= 0 ? 'text-green-600' : 'text-red-600'
+              totals.net >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
             }`}
           >
             ${totals.net.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -261,8 +261,8 @@ export default function ReportsView({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Type Breakdown Pie Chart */}
         {typeData.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Type Breakdown</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Type Breakdown</h3>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -287,8 +287,8 @@ export default function ReportsView({
 
         {/* Category Breakdown */}
         {categoryData.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Top Categories</h3>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Top Categories</h3>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={categoryData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -304,8 +304,8 @@ export default function ReportsView({
 
       {/* Monthly Trend */}
       {monthlyData.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Monthly Trend</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Monthly Trend</h3>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -321,43 +321,43 @@ export default function ReportsView({
       )}
 
       {/* Transaction List */}
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Transactions ({filteredTransactions.length})
         </h3>
         <div className="hidden md:block overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+            <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Date
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Type
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Category
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                   Amount
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
               {filteredTransactions.slice(0, 20).map((transaction) => (
-                <tr key={transaction.id}>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {format(new Date(transaction.date), 'MMM d, yyyy')}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 capitalize">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 capitalize">
                     {transaction.type}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {transaction.category.name}
                   </td>
                   <td
                     className={`px-4 py-3 whitespace-nowrap text-sm font-semibold ${
-                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                      transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     {transaction.type === 'income' ? '+' : '-'}$
@@ -368,7 +368,7 @@ export default function ReportsView({
             </tbody>
           </table>
           {filteredTransactions.length > 20 && (
-            <p className="mt-4 text-sm text-gray-500 text-center">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
               Showing first 20 of {filteredTransactions.length} transactions
             </p>
           )}
@@ -377,17 +377,17 @@ export default function ReportsView({
         {/* Mobile Card View */}
         <div className="md:hidden space-y-3">
           {filteredTransactions.slice(0, 20).map((transaction) => (
-            <div key={transaction.id} className="bg-gray-50 rounded-lg p-3">
+            <div key={transaction.id} className="bg-gray-50 dark:bg-slate-700 rounded-lg p-3 border border-gray-200 dark:border-slate-600">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{transaction.category.name}</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{transaction.category.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     {format(new Date(transaction.date), 'MMM d, yyyy')} • {transaction.type}
                   </p>
                 </div>
                 <p
                   className={`text-sm font-semibold ml-4 ${
-                    transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                    transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   {transaction.type === 'income' ? '+' : '-'}$
@@ -397,7 +397,7 @@ export default function ReportsView({
             </div>
           ))}
           {filteredTransactions.length > 20 && (
-            <p className="mt-4 text-sm text-gray-500 text-center">
+            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
               Showing first 20 of {filteredTransactions.length} transactions
             </p>
           )}
