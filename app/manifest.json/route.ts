@@ -1,7 +1,11 @@
-import { MetadataRoute } from 'next'
+import { NextResponse } from 'next/server'
+import type { MetadataRoute } from 'next'
 
-export default function manifest(): MetadataRoute.Manifest {
-  return {
+export const dynamic = 'force-dynamic'
+export const runtime = 'edge'
+
+export async function GET() {
+  const manifest: MetadataRoute.Manifest = {
     name: 'Finance Manager',
     short_name: 'Finance',
     description: 'Manage your expenses, income, subscriptions, and wallets',
@@ -55,4 +59,12 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
   }
+
+  return NextResponse.json(manifest, {
+    headers: {
+      'Content-Type': 'application/manifest+json',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Access-Control-Allow-Origin': '*',
+    },
+  })
 }
