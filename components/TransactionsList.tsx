@@ -1,3 +1,5 @@
+'use client'
+
 import { Transaction, Category, Wallet } from '@prisma/client'
 import { format } from 'date-fns'
 import { ArrowUpRight, ArrowDownLeft, Trash2 } from 'lucide-react'
