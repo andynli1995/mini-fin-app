@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings } from 'lucide-react'
+import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Lock } from 'lucide-react'
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -15,6 +15,11 @@ const navItems = [
 
 export default function Navigation() {
   const pathname = usePathname()
+
+  const handleLock = () => {
+    localStorage.setItem('app_locked', 'true')
+    window.location.reload()
+  }
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -44,6 +49,16 @@ export default function Navigation() {
                 )
               })}
             </div>
+          </div>
+          <div className="flex items-center">
+            <button
+              onClick={handleLock}
+              className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Lock App"
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Lock</span>
+            </button>
           </div>
         </div>
       </div>

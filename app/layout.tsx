@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import PinLock from "@/components/PinLock";
 
 export const metadata: Metadata = {
   title: "Personal Finance Manager",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <PinLock>{children}</PinLock>
+      </body>
     </html>
   );
 }
