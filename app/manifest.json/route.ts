@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import type { MetadataRoute } from 'next'
 
 export const dynamic = 'force-dynamic'
-export const runtime = 'edge'
 
 export async function GET() {
   const manifest: MetadataRoute.Manifest = {
