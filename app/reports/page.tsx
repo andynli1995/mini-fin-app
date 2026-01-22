@@ -27,7 +27,7 @@ export default async function ReportsPage() {
     type: string
     amount: number
     date: Date
-    description: string | null
+    note: string | null
     walletId: string
     categoryId: string
     createdAt: Date
