@@ -19,6 +19,7 @@ model Wallet {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   transactions Transaction[]
+  subscriptions Subscription[]
   
   @@map("wallets")
 }

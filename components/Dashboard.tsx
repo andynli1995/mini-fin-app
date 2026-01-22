@@ -37,6 +37,15 @@ export default async function Dashboard() {
     take: 5,
   })
 
+  const allActiveSubscriptions = await prisma.subscription.findMany({
+    where: {
+      isActive: true,
+    },
+    include: {
+      wallet: true,
+    },
+  })
+
   return (
     <div className="space-y-6">
       <div>
@@ -47,7 +56,7 @@ export default async function Dashboard() {
       </div>
 
       {/* Reminders Banner */}
-      <RemindersBanner subscriptions={upcomingSubscriptions} />
+      <RemindersBanner subscriptions={allActiveSubscriptions} />
 
       {/* Total Balance Card */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-6 text-white">
