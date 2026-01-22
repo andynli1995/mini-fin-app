@@ -6,7 +6,7 @@ import { ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
   amount: number
   category: Category
-  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
+  wallet: Omit<Wallet, 'balance'> & { balance: number }
 }
 
 interface RecentTransactionsProps {
