@@ -38,17 +38,32 @@ export default function WalletsList({ wallets }: WalletsListProps) {
     }
   }
 
+  // Calculate total balance across all wallets
+  // Note: This assumes all wallets are in the same currency or that currency conversion
+  // has been handled externally. If wallets have different currencies, this total may be misleading.
   const totalBalance = wallets.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
+  
+  // Check if all wallets use the same currency
+  const currencies = new Set(wallets.map(w => w.currency))
+  const hasMultipleCurrencies = currencies.size > 1
 
   return (
     <div className="space-y-4">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
         <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Total Balance Across All Wallets</p>
+          <div className="flex-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {hasMultipleCurrencies ? 'Total Balance (Mixed Currencies)' : 'Total Balance Across All Wallets'}
+            </p>
             <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
               ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
+            {hasMultipleCurrencies && (
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
+                ⚠️ Wallets have different currencies ({Array.from(currencies).join(', ')}). 
+                Total shown without currency conversion.
+              </p>
+            )}
           </div>
         </div>
       </div>

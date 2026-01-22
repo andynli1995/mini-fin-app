@@ -27,7 +27,14 @@ export default async function Dashboard() {
       balance: Number(wallet.balance),
     }))
 
+    // Calculate total balance across all wallets
+    // Note: This assumes all wallets are in the same currency or that currency conversion
+    // has been handled externally. If wallets have different currencies, this total may be misleading.
     const totalBalance = walletsWithNumbers.reduce((sum, wallet) => sum + wallet.balance, 0)
+    
+    // Check if all wallets use the same currency
+    const currencies = new Set(walletsWithNumbers.map(w => w.currency))
+    const hasMultipleCurrencies = currencies.size > 1
 
     const recentTransactions = await prisma.transaction.findMany({
       take: 5,
@@ -163,11 +170,21 @@ export default async function Dashboard() {
         <RemindersBanner subscriptions={allActiveSubscriptionsWithNumbers} />
 
         {/* Total Balance Card */}
-        <BalanceDisplay
-          label="Total Balance"
-          amount={totalBalance}
-          defaultHidden={settings?.hideBalancesByDefault || false}
-        />
+        <div className="space-y-2">
+          <BalanceDisplay
+            label={hasMultipleCurrencies ? "Total Balance (Mixed Currencies)" : "Total Balance"}
+            amount={totalBalance}
+            defaultHidden={settings?.hideBalancesByDefault || false}
+          />
+          {hasMultipleCurrencies && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <p className="text-xs text-yellow-800 dark:text-yellow-300">
+                ⚠️ Wallets have different currencies ({Array.from(currencies).join(', ')}). 
+                Total balance shown without currency conversion.
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Wallets Grid */}
         <div>

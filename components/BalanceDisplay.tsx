@@ -34,6 +34,9 @@ export default function BalanceDisplay({
     setIsHidden(!isHidden)
   }
 
+  // Format amount with 2 decimal places
+  // Note: This component always displays with $ prefix (USD format)
+  // For multi-currency scenarios, currency conversion should be handled before passing the amount
   const formattedAmount = amount.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
