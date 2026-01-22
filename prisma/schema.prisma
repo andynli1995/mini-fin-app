@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Wallet {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // e.g., "Payoneer", "MEXC", "Bank", "Cash"
+  balance     Float    @default(0)
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  transactions Transaction[]
+  
+  @@map("wallets")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // "expense", "income", "lend", "rent"
+  color       String?  // For UI display
+  icon        String?  // Icon identifier
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  transactions Transaction[]
+  
+  @@unique([name, type])
+  @@map("categories")
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  type        String   // "expense", "income", "lend", "rent"
+  amount      Float
+  date        DateTime
+  note        String?
+  categoryId  String
+  walletId    String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([type])
+  @@index([date])
+  @@index([categoryId])
+  @@index([walletId])
+  @@map("transactions")
+}
+
+model Subscription {
+  id            String   @id @default(cuid())
+  serviceName   String
+  amount        Float
+  period        String   // "monthly", "yearly", "weekly", "daily"
+  startDate     DateTime
+  nextDueDate   DateTime
+  paymentMethod String?  // e.g., "Credit Card", "Payoneer", etc.
+  walletId      String?
+  wallet        Wallet?  @relation(fields: [walletId], references: [id], onDelete: SetNull)
+  isActive      Boolean  @default(true)
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([nextDueDate])
+  @@index([isActive])
+  @@map("subscriptions")
+}
