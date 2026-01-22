@@ -4,14 +4,19 @@ import { useState, useEffect } from 'react'
 import { Category, Wallet, Transaction } from '@prisma/client'
 import { Plus, X } from 'lucide-react'
 
-interface TransactionWithRelations extends Transaction {
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
+}
+
+interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
+  amount: number
   category: Category
-  wallet: Wallet
+  wallet: Omit<Wallet, 'balance'> & { balance: number }
 }
 
 interface TransactionFormProps {
   categories: Category[]
-  wallets: Wallet[]
+  wallets: WalletWithNumber[]
   transaction?: TransactionWithRelations
   onClose?: () => void
 }

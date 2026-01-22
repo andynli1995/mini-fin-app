@@ -6,15 +6,20 @@ import { format } from 'date-fns'
 import { ArrowUpRight, ArrowDownLeft, Trash2, Edit } from 'lucide-react'
 import TransactionForm from './TransactionForm'
 
-interface TransactionWithRelations extends Transaction {
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
+}
+
+interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
+  amount: number
   category: Category
-  wallet: Wallet
+  wallet: Omit<Wallet, 'balance'> & { balance: number }
 }
 
 interface TransactionsListProps {
   transactions: TransactionWithRelations[]
   categories?: Category[]
-  wallets?: Wallet[]
+  wallets?: WalletWithNumber[]
 }
 
 export default function TransactionsList({ transactions, categories = [], wallets = [] }: TransactionsListProps) {

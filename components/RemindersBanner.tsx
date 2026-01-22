@@ -6,8 +6,9 @@ import { differenceInDays, format } from 'date-fns'
 import { AlertCircle, Bell } from 'lucide-react'
 import Link from 'next/link'
 
-interface SubscriptionWithWallet extends Subscription {
-  wallet: Wallet | null
+interface SubscriptionWithWallet extends Omit<Subscription, 'amount'> {
+  amount: number
+  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
 }
 
 interface RemindersBannerProps {

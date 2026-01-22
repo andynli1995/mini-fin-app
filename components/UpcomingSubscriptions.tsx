@@ -3,8 +3,9 @@ import { format, differenceInDays } from 'date-fns'
 import Link from 'next/link'
 import { Calendar, AlertCircle } from 'lucide-react'
 
-interface SubscriptionWithWallet extends Subscription {
-  wallet: Wallet | null
+interface SubscriptionWithWallet extends Omit<Subscription, 'amount'> {
+  amount: number
+  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
 }
 
 interface UpcomingSubscriptionsProps {

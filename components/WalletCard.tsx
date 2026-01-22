@@ -5,8 +5,12 @@ import { Wallet } from '@prisma/client'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
+}
+
 interface WalletCardProps {
-  wallet: Wallet
+  wallet: WalletWithNumber
   defaultHidden?: boolean
 }
 

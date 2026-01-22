@@ -3,9 +3,10 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 
-interface TransactionWithRelations extends Transaction {
+interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
+  amount: number
   category: Category
-  wallet: Wallet
+  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
 }
 
 interface RecentTransactionsProps {
