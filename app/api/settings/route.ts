@@ -30,7 +30,16 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json()
+    let body
+    try {
+      body = await request.json()
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      )
+    }
+    
     const { hideBalancesByDefault, lockTimeoutMinutes, enableNotifications, reminderDays } = body
 
     let settings = await prisma.appSettings.findFirst()

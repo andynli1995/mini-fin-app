@@ -99,12 +99,31 @@ export default function SettingsView() {
         setSaveSuccess('Preferences saved successfully!')
         setTimeout(() => setSaveSuccess(''), 3000)
       } else {
-        const errorData = await response.json()
-        setSaveError(errorData.error || 'Failed to save preferences')
+        // Handle different error status codes
+        if (response.status === 405) {
+          setSaveError('Method not allowed. Please refresh the page and try again.')
+        } else {
+          // Try to parse error message, but handle empty responses
+          const contentType = response.headers.get('content-type')
+          if (contentType && contentType.includes('application/json')) {
+            try {
+              const errorData = await response.json()
+              setSaveError(errorData.error || `Failed to save preferences (${response.status})`)
+            } catch {
+              setSaveError(`Failed to save preferences (${response.status})`)
+            }
+          } else {
+            setSaveError(`Failed to save preferences (${response.status})`)
+          }
+        }
       }
     } catch (error) {
       console.error('Error saving preferences:', error)
-      setSaveError('Failed to save preferences. Please try again.')
+      if (error instanceof SyntaxError) {
+        setSaveError('Invalid response from server. Please refresh and try again.')
+      } else {
+        setSaveError('Failed to save preferences. Please try again.')
+      }
     } finally {
       setIsSaving(false)
     }
