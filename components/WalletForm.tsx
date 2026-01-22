@@ -148,7 +148,14 @@ export default function WalletForm({ wallet, onClose }: WalletFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Initial Balance</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {wallet ? 'Current Balance' : 'Initial Balance'}
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">
+              {wallet 
+                ? 'Manually adjust the balance. Future transactions will preserve this as the baseline.'
+                : 'Set the starting balance for this wallet.'}
+            </p>
             <input
               type="number"
               step="0.01"

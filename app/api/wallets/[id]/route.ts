@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function PUT(
   request: NextRequest,
@@ -16,18 +17,18 @@ export async function PUT(
       )
     }
 
-    // Note: Balance can be manually updated here, but this should be used carefully.
-    // The balance is normally maintained automatically by transaction operations.
-    // Manual balance changes can cause inconsistencies if they don't match the sum of transactions.
+    // Manual balance update: When balance is explicitly provided, it's set directly.
+    // This becomes the new baseline, and future transactions will preserve this balance.
+    // Balance = Manually Set Balance + sum(income) - sum(expense) - sum(lend) - sum(rent)
     const updateData: any = {
       name,
       type,
       currency: currency || 'USD',
     }
     
-    // Only update balance if explicitly provided
+    // If balance is explicitly provided, set it directly (manual adjustment)
     if (balance !== undefined) {
-      updateData.balance = parseFloat(balance)
+      updateData.balance = new Prisma.Decimal(parseFloat(balance))
     }
 
     const wallet = await prisma.wallet.update({
