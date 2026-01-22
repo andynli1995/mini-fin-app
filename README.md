@@ -44,11 +44,17 @@ npm install
 
 2. Set up Supabase:
    - Create a new project at [supabase.com](https://supabase.com)
-   - Go to Settings > Database to get your connection string
+   - Go to Settings > Database > Connection Pooling
+   - Select "Transaction" mode and copy the connection string
    - Create a `.env` file in the root directory:
    ```bash
-   DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@[YOUR-PROJECT-REF].supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
+   # For local development (use direct connection)
+   DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
+   
+   # For Vercel/production (use connection pooler - port 6543)
+   # DATABASE_URL="postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1"
    ```
+   - See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions
 
 3. Set up the database:
 ```bash
