@@ -1,6 +1,6 @@
 // Service Worker for Finance Manager PWA
-const CACHE_NAME = 'finance-manager-v2'
-const STATIC_CACHE_NAME = 'finance-manager-static-v2'
+const CACHE_NAME = 'finance-manager-v3'
+const STATIC_CACHE_NAME = 'finance-manager-static-v3'
 
 // Static assets to cache on install
 const staticAssets = [
@@ -26,8 +26,15 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Skip non-GET requests
+  // Explicitly forward non-GET requests (PUT, POST, DELETE, etc.) to network
+  // This ensures API routes work correctly in production
   if (request.method !== 'GET') {
+    // For API routes, always go to network
+    if (url.pathname.startsWith('/api/')) {
+      event.respondWith(fetch(request))
+      return
+    }
+    // For other non-GET requests, let them pass through
     return
   }
 
