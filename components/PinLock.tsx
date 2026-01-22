@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Lock, Unlock } from 'lucide-react'
 
 const PIN_STORAGE_KEY = 'app_pin'
@@ -52,25 +52,25 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         clearTimeout(inactivityTimerRef.current)
       }
     }
-  }, [isLocked, hasPin])
+  }, [isLocked, hasPin, resetInactivityTimer])
 
-  const resetInactivityTimer = () => {
+  const lockApp = useCallback(() => {
+    setIsLocked(true)
+    localStorage.setItem(LOCK_STATE_KEY, 'true')
+    setEnteredPin('')
+    setError('')
+  }, [])
+
+  const resetInactivityTimer = useCallback(() => {
     if (inactivityTimerRef.current) {
       clearTimeout(inactivityTimerRef.current)
     }
     inactivityTimerRef.current = setTimeout(() => {
       lockApp()
     }, INACTIVITY_TIMEOUT)
-  }
+  }, [lockApp])
 
-  const lockApp = () => {
-    setIsLocked(true)
-    localStorage.setItem(LOCK_STATE_KEY, 'true')
-    setEnteredPin('')
-    setError('')
-  }
-
-  const unlockApp = () => {
+  const unlockApp = useCallback(() => {
     const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
     if (enteredPin === storedPin) {
       setIsLocked(false)
@@ -82,7 +82,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       setError('Incorrect PIN. Please try again.')
       setEnteredPin('')
     }
-  }
+  }, [enteredPin, resetInactivityTimer])
 
   const setupPin = () => {
     if (pin.length < 4) {
@@ -147,7 +147,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         unlockApp()
       }
     }
-  }, [enteredPin, isSettingUp])
+  }, [enteredPin, isSettingUp, unlockApp])
 
   // Handle keyboard input
   useEffect(() => {
