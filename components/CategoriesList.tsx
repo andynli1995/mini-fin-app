@@ -1,3 +1,5 @@
+'use client'
+
 import { Category } from '@prisma/client'
 import { Trash2 } from 'lucide-react'
 
