@@ -72,6 +72,23 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 
 **Note:** The direct connection (port 5432) may not work on Vercel due to IP restrictions. Always use the pooler URL (port 6543) for Vercel.
 
+### Alternative: Direct Connection for Vercel (If Pooler Fails)
+If the connection pooler continues to have issues on Vercel, you can try the direct connection:
+
+1. **Get Direct Connection String**:
+   - Go to Supabase Dashboard > Settings > Database
+   - Copy the "Connection string" (URI) - this is the direct connection
+   - Format: `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+
+2. **Allow Vercel IPs** (if needed):
+   - Go to Supabase Dashboard > Settings > Database > Network Restrictions
+   - Add Vercel's IP ranges or set to "Allow all IPs" (for testing)
+   - Vercel IP ranges can be found in Vercel's documentation
+
+3. **Use in Vercel**:
+   - Set `DATABASE_URL` in Vercel to the direct connection string
+   - Note: This may have connection limits, so pooler is still recommended
+
 ## Security Notes
 
 - Never commit your `.env` file to git
@@ -98,6 +115,43 @@ If you see this error, check the following:
    - Go to Supabase Dashboard > Settings > Database > Connection Pooling
    - Make sure "Transaction" mode is enabled
    - If it's not enabled, enable it and wait a few minutes for it to activate
+
+#### "Circuit breaker open" Error
+If you see "Circuit breaker open: Failed to retrieve database credentials":
+
+This error occurs when Supabase's connection pooler detects too many failed connection attempts. This is a protection mechanism.
+
+**Solutions:**
+
+1. **Wait and Retry**: 
+   - The circuit breaker will reset after a few minutes
+   - Wait 2-5 minutes and try again
+
+2. **Check Connection String Format**:
+   - Make sure you're using the exact connection string from Supabase Dashboard
+   - It should include `?pgbouncer=true&connection_limit=1`
+   - The username format should be `postgres.[PROJECT-REF]` (with dot)
+
+3. **Use Direct Connection for Vercel** (Alternative):
+   - If the pooler continues to have issues, you can try the direct connection
+   - Go to Supabase Dashboard > Settings > Database
+   - Copy the "Connection string" (URI) - this is the direct connection
+   - Format: `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+   - **Note**: You may need to allow Vercel's IP ranges in Supabase (Settings > Database > Network Restrictions)
+   - Or set "Allow all IPs" temporarily for testing
+
+4. **Reduce Connection Limit**:
+   - Make sure `connection_limit=1` is in your connection string
+   - This is important for serverless environments like Vercel
+
+5. **Verify Environment Variable**:
+   - In Vercel, make sure `DATABASE_URL` is set correctly
+   - Check for any extra spaces, line breaks, or encoding issues
+   - Try removing and re-adding the environment variable
+
+6. **Check Supabase Project Status**:
+   - Make sure your Supabase project is active and not paused
+   - Free tier projects can pause after inactivity
 
 #### "Authentication failed" Error
 If you see "Authentication failed" or "provided database credentials are not valid":
