@@ -22,7 +22,47 @@ export default async function ReportsPage() {
   })
 
   // Convert Decimal to number for Client Components
-  const transactionsWithNumbers = transactions.map((transaction) => ({
+  type TransactionWithNumbers = {
+    id: string
+    type: string
+    amount: number
+    date: Date
+    description: string | null
+    walletId: string
+    categoryId: string
+    createdAt: Date
+    updatedAt: Date
+    category: {
+      id: string
+      name: string
+      type: string
+      color: string | null
+      icon: string | null
+      createdAt: Date
+      updatedAt: Date
+    }
+    wallet: {
+      id: string
+      name: string
+      type: string
+      balance: number
+      currency: string
+      createdAt: Date
+      updatedAt: Date
+    }
+  }
+
+  type WalletWithNumber = {
+    id: string
+    name: string
+    type: string
+    balance: number
+    currency: string
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  const transactionsWithNumbers: TransactionWithNumbers[] = transactions.map((transaction) => ({
     ...transaction,
     amount: Number(transaction.amount),
     wallet: {
@@ -31,7 +71,7 @@ export default async function ReportsPage() {
     },
   }))
 
-  const walletsWithNumbers = wallets.map((wallet) => ({
+  const walletsWithNumbers: WalletWithNumber[] = wallets.map((wallet) => ({
     ...wallet,
     balance: Number(wallet.balance),
   }))

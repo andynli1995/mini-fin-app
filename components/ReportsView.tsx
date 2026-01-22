@@ -23,10 +23,14 @@ interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
   wallet: Omit<Wallet, 'balance'> & { balance: number }
 }
 
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
+}
+
 interface ReportsViewProps {
   transactions: TransactionWithRelations[]
   categories: Category[]
-  wallets: Wallet[]
+  wallets: WalletWithNumber[]
 }
 
 const COLORS = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4']
