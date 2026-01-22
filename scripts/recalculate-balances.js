@@ -43,11 +43,9 @@ async function recalculateBalances(fix = false) {
 
       const storedBalance = new Prisma.Decimal(wallet.balance)
       
-      // Calculate initial balance: stored balance - net from transactions
-      const estimatedInitialBalance = storedBalance.minus(calculatedFromTransactions)
-      
-      // Expected balance = initial balance + transactions (should match stored)
-      const expectedBalance = estimatedInitialBalance.plus(calculatedFromTransactions)
+      // Balance should equal net from transactions only (no initial balance)
+      // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const expectedBalance = calculatedFromTransactions
       const difference = storedBalance.minus(expectedBalance)
       
       // Check if there's a discrepancy (more than 0.01 difference)
@@ -78,7 +76,6 @@ async function recalculateBalances(fix = false) {
         walletName: wallet.name,
         storedBalance: Number(storedBalance),
         calculatedFromTransactions: Number(calculatedFromTransactions),
-        estimatedInitialBalance: Number(estimatedInitialBalance),
         expectedBalance: Number(expectedBalance),
         difference: Number(difference),
         transactionCount: wallet.transactions.length,
@@ -94,14 +91,14 @@ async function recalculateBalances(fix = false) {
       results.push(result)
 
       if (hasDiscrepancy) {
-        const correctBalance = estimatedInitialBalance.plus(calculatedFromTransactions)
+        // Correct balance = net from transactions only
+        const correctBalance = calculatedFromTransactions
         
         updates.push({
           walletId: wallet.id,
           walletName: wallet.name,
           storedBalance: Number(storedBalance),
           calculatedBalance: Number(calculatedFromTransactions),
-          estimatedInitialBalance: Number(estimatedInitialBalance),
           correctBalance: Number(correctBalance),
           difference: Number(difference),
         })
@@ -112,7 +109,7 @@ async function recalculateBalances(fix = false) {
             where: { id: wallet.id },
             data: { balance: correctBalance },
           })
-          console.log(`✓ Fixed balance for "${wallet.name}": ${Number(storedBalance).toFixed(2)} → ${Number(correctBalance).toFixed(2)}`)
+          console.log(`✓ Fixed balance for "${wallet.name}": $${Number(storedBalance).toFixed(2)} → $${Number(correctBalance).toFixed(2)}`)
         }
       }
     }
@@ -123,7 +120,6 @@ async function recalculateBalances(fix = false) {
       console.log(`Wallet: ${result.walletName}`)
       console.log(`  Stored Balance: $${result.storedBalance.toFixed(2)}`)
       console.log(`  Net from Transactions: $${result.calculatedFromTransactions.toFixed(2)}`)
-      console.log(`  Estimated Initial Balance: $${result.estimatedInitialBalance.toFixed(2)}`)
       console.log(`  Expected Balance: $${result.expectedBalance.toFixed(2)}`)
       console.log(`  Difference: $${result.difference.toFixed(2)}`)
       console.log(`  Transactions: ${result.transactionCount}`)

@@ -54,42 +54,31 @@ export async function PUT(
       })
 
       // Recalculate balances for affected wallets
+      // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
       const walletsToUpdate = walletChanged 
         ? [existingTransaction.walletId, walletId]
         : [walletId]
 
       for (const wId of walletsToUpdate) {
-        const wallet = await tx.wallet.findUnique({
-          where: { id: wId },
-        })
-
         // Get all transactions for this wallet
         const transactions = await tx.transaction.findMany({
           where: { walletId: wId },
         })
 
-        // Calculate net from transactions
-        let netFromTransactions = new Prisma.Decimal(0)
+        // Calculate balance from transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+        let balance = new Prisma.Decimal(0)
         for (const t of transactions) {
           const amt = new Prisma.Decimal(t.amount)
           if (t.type === 'income') {
-            netFromTransactions = netFromTransactions.plus(amt)
+            balance = balance.plus(amt)
           } else {
-            netFromTransactions = netFromTransactions.minus(amt)
+            balance = balance.minus(amt)
           }
         }
 
-        // Calculate initial balance: stored balance - net from transactions
-        // This preserves the initial balance that was set when wallet was created
-        const storedBalance = new Prisma.Decimal(wallet!.balance)
-        const initialBalance = storedBalance.minus(netFromTransactions)
-        
-        // New balance = initial balance + net from all transactions
-        const newBalance = initialBalance.plus(netFromTransactions)
-
         await tx.wallet.update({
           where: { id: wId },
-          data: { balance: newBalance },
+          data: { balance },
         })
       }
 
@@ -128,58 +117,31 @@ export async function DELETE(
     const walletId = transaction.walletId
 
       // Delete transaction and recalculate wallet balance
+      // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
       await prisma.$transaction(async (tx) => {
-        const wallet = await tx.wallet.findUnique({
-          where: { id: walletId },
-        })
-
-        // Get all transactions BEFORE deletion (to calculate initial balance)
-        const transactionsBefore = await tx.transaction.findMany({
-          where: { walletId },
-        })
-
-        // Calculate net from transactions before deletion
-        let netBefore = new Prisma.Decimal(0)
-        for (const t of transactionsBefore) {
-          const amt = new Prisma.Decimal(t.amount)
-          if (t.type === 'income') {
-            netBefore = netBefore.plus(amt)
-          } else {
-            netBefore = netBefore.minus(amt)
-          }
-        }
-
-        // Calculate initial balance
-        const storedBalance = new Prisma.Decimal(wallet!.balance)
-        const initialBalance = storedBalance.minus(netBefore)
-
         // Delete the transaction
         await tx.transaction.delete({
           where: { id: params.id },
         })
 
-        // Get remaining transactions after deletion
-        const transactionsAfter = await tx.transaction.findMany({
+        // Recalculate balance from remaining transactions
+        const transactions = await tx.transaction.findMany({
           where: { walletId },
         })
 
-        // Calculate net from remaining transactions
-        let netAfter = new Prisma.Decimal(0)
-        for (const t of transactionsAfter) {
+        let balance = new Prisma.Decimal(0)
+        for (const t of transactions) {
           const amt = new Prisma.Decimal(t.amount)
           if (t.type === 'income') {
-            netAfter = netAfter.plus(amt)
+            balance = balance.plus(amt)
           } else {
-            netAfter = netAfter.minus(amt)
+            balance = balance.minus(amt)
           }
         }
 
-        // New balance = initial balance + net from remaining transactions
-        const newBalance = initialBalance.plus(netAfter)
-
         await tx.wallet.update({
           where: { id: walletId },
-          data: { balance: newBalance },
+          data: { balance },
         })
       })
 

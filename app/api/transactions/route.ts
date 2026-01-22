@@ -28,32 +28,9 @@ export async function POST(request: NextRequest) {
     const amountDecimal = new Prisma.Decimal(amount)
 
     // Create transaction and recalculate wallet balance
+    // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
     const result = await prisma.$transaction(async (tx) => {
-      // Get current wallet and existing transactions BEFORE creating the new transaction
-      const currentWallet = await tx.wallet.findUnique({
-        where: { id: walletId },
-      })
-      
-      const existingTransactions = await tx.transaction.findMany({
-        where: { walletId },
-      })
-
-      // Calculate net from existing transactions (before the new one)
-      let netFromExisting = new Prisma.Decimal(0)
-      for (const t of existingTransactions) {
-        const amt = new Prisma.Decimal(t.amount)
-        if (t.type === 'income') {
-          netFromExisting = netFromExisting.plus(amt)
-        } else {
-          netFromExisting = netFromExisting.minus(amt)
-        }
-      }
-
-      // Calculate initial balance: stored balance - net from existing transactions
-      const storedBalance = new Prisma.Decimal(currentWallet!.balance)
-      const initialBalance = storedBalance.minus(netFromExisting)
-
-      // Now create the new transaction
+      // Create the new transaction
       const transaction = await tx.transaction.create({
         data: {
           type,
@@ -65,19 +42,25 @@ export async function POST(request: NextRequest) {
         },
       })
 
-      // Calculate net from ALL transactions (including the new one)
-      const newTransactionNet = type === 'income' 
-        ? amountDecimal 
-        : new Prisma.Decimal(0).minus(amountDecimal) // Negate for expense/lend/rent
-      
-      const netFromAll = netFromExisting.plus(newTransactionNet)
+      // Recalculate balance from ALL transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const transactions = await tx.transaction.findMany({
+        where: { walletId },
+      })
 
-      // New balance = initial balance + net from all transactions
-      const newBalance = initialBalance.plus(netFromAll)
+      let balance = new Prisma.Decimal(0)
+      for (const t of transactions) {
+        const amt = new Prisma.Decimal(t.amount)
+        if (t.type === 'income') {
+          balance = balance.plus(amt)
+        } else {
+          // expense, lend, rent all subtract
+          balance = balance.minus(amt)
+        }
+      }
 
       await tx.wallet.update({
         where: { id: walletId },
-        data: { balance: newBalance },
+        data: { balance },
       })
 
       return transaction
