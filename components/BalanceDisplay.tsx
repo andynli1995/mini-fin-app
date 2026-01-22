@@ -40,12 +40,12 @@ export default function BalanceDisplay({
   })
 
   return (
-    <div className={`bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-4 sm:p-6 text-white ${className}`}>
+    <div className={`bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-lg shadow-lg p-4 sm:p-6 text-white ${className}`}>
       <div className="flex items-center justify-between">
-        <p className="text-blue-100 text-sm font-medium">{label}</p>
+        <p className="text-blue-100 dark:text-blue-200 text-sm font-medium">{label}</p>
         <button
           onClick={toggleVisibility}
-          className="text-blue-100 hover:text-white transition-colors p-1"
+          className="text-blue-100 dark:text-blue-200 hover:text-white transition-colors p-1"
           aria-label={isHidden ? 'Show balance' : 'Hide balance'}
         >
           {isHidden ? (
@@ -55,7 +55,7 @@ export default function BalanceDisplay({
           )}
         </button>
       </div>
-      <p className={`${textSize} font-bold mt-2`}>
+      <p className={`${textSize} font-bold mt-2 text-white`}>
         {isHidden ? '••••••' : `$${formattedAmount}`}
       </p>
     </div>

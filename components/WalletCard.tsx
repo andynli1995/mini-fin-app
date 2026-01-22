@@ -34,11 +34,11 @@ export default function WalletCard({ wallet, defaultHidden = false }: WalletCard
 
   return (
     <Link href={`/wallets/${wallet.id}`}>
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6 hover:shadow-md transition-shadow cursor-pointer">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 hover:shadow-md dark:hover:shadow-xl transition-all cursor-pointer border border-gray-200 dark:border-slate-700">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1 min-w-0">
-            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{wallet.name}</h3>
-            <p className="text-sm text-gray-500 mt-1">{wallet.type}</p>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{wallet.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{wallet.type}</p>
           </div>
           <button
             onClick={(e) => {
@@ -46,7 +46,7 @@ export default function WalletCard({ wallet, defaultHidden = false }: WalletCard
               e.stopPropagation()
               toggleVisibility()
             }}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 flex-shrink-0 ml-2"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 flex-shrink-0 ml-2"
             aria-label={isHidden ? 'Show balance' : 'Hide balance'}
           >
             {isHidden ? (
@@ -57,7 +57,7 @@ export default function WalletCard({ wallet, defaultHidden = false }: WalletCard
           </button>
         </div>
         <div className="mt-4">
-          <p className="text-xl sm:text-2xl font-bold text-gray-900">
+          <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
             {isHidden ? '••••••' : `${wallet.currency} ${formattedBalance}`}
           </p>
         </div>

@@ -49,13 +49,13 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-[9999] animate-slide-up">
-      <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-4">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl dark:shadow-2xl border border-gray-200 dark:border-slate-700 p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
               Install Finance Manager
             </h3>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 dark:text-gray-400">
               {hasPrompt
                 ? 'Install this app on your device for quick access and a better experience.'
                 : 'Add this app to your home screen for quick access.'}
@@ -63,7 +63,7 @@ export default function InstallPrompt() {
           </div>
           <button
             onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 ml-2 flex-shrink-0 transition-colors"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />
@@ -72,14 +72,14 @@ export default function InstallPrompt() {
         <div className="flex gap-2">
           <button
             onClick={handleInstallClick}
-            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 transition-colors"
           >
             <Download className="w-4 h-4 mr-2" />
             {hasPrompt ? 'Install' : 'Show Instructions'}
           </button>
           <button
             onClick={handleDismiss}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-slate-700 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 dark:focus:ring-offset-slate-800 transition-colors"
           >
             Not now
           </button>

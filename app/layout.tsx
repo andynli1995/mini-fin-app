@@ -3,6 +3,7 @@ import "./globals.css";
 import PinLock from "@/components/PinLock";
 import InstallPrompt from "@/components/InstallPrompt";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Personal Finance Manager",
@@ -49,11 +50,13 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
       <body>
-        <ServiceWorkerRegistration />
-        <PinLock>
-          {children}
-          <InstallPrompt />
-        </PinLock>
+        <ThemeProvider>
+          <ServiceWorkerRegistration />
+          <PinLock>
+            {children}
+            <InstallPrompt />
+          </PinLock>
+        </ThemeProvider>
       </body>
     </html>
   );

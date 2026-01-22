@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Lock, Save, Download } from 'lucide-react'
+import { Eye, EyeOff, Lock, Save, Download, Sun, Moon, Monitor } from 'lucide-react'
 import { useInstallPWA } from './useInstallPWA'
+import { useTheme } from './ThemeProvider'
 
 export default function SettingsView() {
   const [hasPin, setHasPin] = useState(false)
@@ -20,6 +21,7 @@ export default function SettingsView() {
   const [showConfirmPin, setShowConfirmPin] = useState(false)
   const [pinError, setPinError] = useState('')
   const [pinSuccess, setPinSuccess] = useState('')
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     fetchSettings()
@@ -105,21 +107,73 @@ export default function SettingsView() {
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">Loading settings...</div>
+    return <div className="text-center py-8 text-gray-900 dark:text-gray-100">Loading settings...</div>
   }
 
   return (
     <div className="space-y-6">
-      {/* Privacy Settings */}
-      <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Privacy Settings</h2>
+      {/* Theme Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Appearance</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Theme
+              </label>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                Choose your preferred color scheme
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              onClick={() => setTheme('light')}
+              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                theme === 'light'
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <Sun className={`w-6 h-6 mb-2 ${theme === 'light' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />
+              <span className={`text-sm font-medium ${theme === 'light' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>Light</span>
+            </button>
+            <button
+              onClick={() => setTheme('dark')}
+              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                theme === 'dark'
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <Moon className={`w-6 h-6 mb-2 ${theme === 'dark' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />
+              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>Dark</span>
+            </button>
+            <button
+              onClick={() => setTheme('system')}
+              className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-all ${
+                theme === 'system'
+                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600'
+              }`}
+            >
+              <Monitor className={`w-6 h-6 mb-2 ${theme === 'system' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`} />
+              <span className={`text-sm font-medium ${theme === 'system' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>System</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Privacy Settings */}
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Privacy Settings</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Hide Balances by Default
               </label>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Balances will be hidden on dashboard load. You can still toggle visibility.
               </p>
             </div>
@@ -136,7 +190,7 @@ export default function SettingsView() {
           <button
             onClick={handleSavePreferences}
             disabled={isSaving}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
           >
             <Save className="w-4 h-4 mr-2" />
             {isSaving ? 'Saving...' : 'Save Preferences'}
@@ -146,14 +200,14 @@ export default function SettingsView() {
 
       {/* PIN Settings */}
       {hasPin && (
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Lock className="w-5 h-5 mr-2" />
             Update PIN Code
           </h2>
           <form onSubmit={handleUpdatePin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Current PIN
               </label>
               <div className="relative">
@@ -161,7 +215,7 @@ export default function SettingsView() {
                   type={showCurrentPin ? 'text' : 'password'}
                   value={currentPin}
                   onChange={(e) => setCurrentPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                 />
                 <button
@@ -170,16 +224,16 @@ export default function SettingsView() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showCurrentPin ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 New PIN (4-6 digits)
               </label>
               <div className="relative">
@@ -187,7 +241,7 @@ export default function SettingsView() {
                   type={showNewPin ? 'text' : 'password'}
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                   minLength={4}
                   maxLength={6}
@@ -198,16 +252,16 @@ export default function SettingsView() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showNewPin ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Confirm New PIN
               </label>
               <div className="relative">
@@ -215,7 +269,7 @@ export default function SettingsView() {
                   type={showConfirmPin ? 'text' : 'password'}
                   value={confirmNewPin}
                   onChange={(e) => setConfirmNewPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pr-10"
+                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                   minLength={4}
                   maxLength={6}
@@ -226,29 +280,29 @@ export default function SettingsView() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                 >
                   {showConfirmPin ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
             </div>
 
             {pinError && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{pinError}</p>
+              <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{pinError}</p>
               </div>
             )}
 
             {pinSuccess && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-600">{pinSuccess}</p>
+              <div className="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+                <p className="text-sm text-green-600 dark:text-green-400">{pinSuccess}</p>
               </div>
             )}
 
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               Update PIN
             </button>
@@ -257,8 +311,8 @@ export default function SettingsView() {
       )}
 
       {!hasPin && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+          <p className="text-sm text-yellow-800 dark:text-yellow-300">
             PIN is not set. Set up a PIN from the lock screen to enable PIN management here.
           </p>
         </div>
@@ -266,13 +320,13 @@ export default function SettingsView() {
 
       {/* PWA Install */}
       {canInstall && (
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
             <Download className="w-5 h-5 mr-2" />
             Install App
           </h2>
           <div className="space-y-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {isInstalled
                 ? 'App is already installed on your device.'
                 : hasPrompt
@@ -282,7 +336,7 @@ export default function SettingsView() {
             {!isInstalled && (
               <button
                 onClick={install}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 transition-colors"
               >
                 <Download className="w-4 h-4 mr-2" />
                 {hasPrompt ? 'Install App' : 'Show Install Instructions'}

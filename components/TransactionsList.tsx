@@ -15,15 +15,15 @@ export default function TransactionsList({ transactions }: TransactionsListProps
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'income':
-        return 'text-green-600 bg-green-50'
+        return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30'
       case 'expense':
-        return 'text-red-600 bg-red-50'
+        return 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
       case 'lend':
-        return 'text-yellow-600 bg-yellow-50'
+        return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
       case 'rent':
-        return 'text-blue-600 bg-blue-50'
+        return 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
       default:
-        return 'text-gray-600 bg-gray-50'
+        return 'text-gray-700 dark:text-gray-400 bg-gray-50 dark:bg-gray-700'
     }
   }
 
@@ -47,7 +47,7 @@ export default function TransactionsList({ transactions }: TransactionsListProps
 
   // Mobile card view
   const MobileCard = ({ transaction }: { transaction: TransactionWithRelations }) => (
-    <div className="bg-white rounded-lg shadow p-4 mb-4">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 mb-4 border border-gray-200 dark:border-slate-700">
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -64,18 +64,18 @@ export default function TransactionsList({ transactions }: TransactionsListProps
               {transaction.type}
             </span>
           </div>
-          <p className="font-medium text-gray-900">{transaction.category.name}</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="font-medium text-gray-900 dark:text-gray-100">{transaction.category.name}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {format(new Date(transaction.date), 'MMM d, yyyy')} • {transaction.wallet.name}
           </p>
           {transaction.note && (
-            <p className="text-sm text-gray-500 mt-1">{transaction.note}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{transaction.note}</p>
           )}
         </div>
         <div className="text-right ml-4">
           <p
             className={`text-lg font-semibold ${
-              transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+              transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
             }`}
           >
             {transaction.type === 'income' ? '+' : '-'}$
@@ -86,7 +86,7 @@ export default function TransactionsList({ transactions }: TransactionsListProps
           </p>
           <button
             onClick={() => handleDelete(transaction.id)}
-            className="mt-2 text-red-600 hover:text-red-900"
+            className="mt-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -96,46 +96,46 @@ export default function TransactionsList({ transactions }: TransactionsListProps
   )
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg overflow-hidden border border-gray-200 dark:border-slate-700">
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+          <thead className="bg-gray-50 dark:bg-slate-700">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Type
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Category
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Wallet
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Amount
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Note
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                   No transactions yet. Add your first transaction to get started.
                 </td>
               </tr>
             ) : (
               transactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {format(new Date(transaction.date), 'MMM d, yyyy')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -152,15 +152,15 @@ export default function TransactionsList({ transactions }: TransactionsListProps
                       {transaction.type}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {transaction.category.name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     {transaction.wallet.name}
                   </td>
                   <td
                     className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${
-                      transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                      transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}
                   >
                     {transaction.type === 'income' ? '+' : '-'}$
@@ -169,13 +169,13 @@ export default function TransactionsList({ transactions }: TransactionsListProps
                       maximumFractionDigits: 2,
                     })}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                     {transaction.note || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
                       onClick={() => handleDelete(transaction.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -190,7 +190,7 @@ export default function TransactionsList({ transactions }: TransactionsListProps
       {/* Mobile Card View */}
       <div className="md:hidden p-4">
         {transactions.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
             No transactions yet. Add your first transaction to get started.
           </div>
         ) : (

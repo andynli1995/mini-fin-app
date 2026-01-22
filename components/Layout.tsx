@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex flex-col transition-colors">
       {/* Navigation header */}
       <Navigation onMenuClick={toggleSidebar} />
 
@@ -58,7 +58,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </div>

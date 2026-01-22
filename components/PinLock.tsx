@@ -311,7 +311,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center">
         <div className="text-white text-xl">Loading...</div>
       </div>
     )
@@ -319,19 +319,19 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
 
   if (isSettingUp) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl dark:shadow-2xl p-8 max-w-md w-full border border-gray-200 dark:border-slate-700">
           <div className="text-center mb-6">
-            <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900">Set Up PIN</h1>
-            <p className="text-gray-600 mt-2">Create a 4-6 digit PIN to secure your financial data</p>
-            <p className="text-xs text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
+            <Lock className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Set Up PIN</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Create a 4-6 digit PIN to secure your financial data</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
           </div>
 
           {!showConfirm ? (
             <>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Enter PIN (4-6 digits)
                 </label>
                 <div className="flex justify-center space-x-2 mb-4">
@@ -340,13 +340,13 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                       key={i}
                       className={`w-3 h-3 rounded-full border-2 ${
                         i < pin.length
-                          ? 'bg-blue-600 border-blue-600'
-                          : 'border-gray-300'
+                          ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500'
+                          : 'border-gray-300 dark:border-gray-600'
                       }`}
                     />
                   ))}
                 </div>
-                <p className="text-center text-sm text-gray-500">{pin.length} / 6</p>
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400">{pin.length} / 6</p>
               </div>
 
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -354,20 +354,20 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                   <button
                     key={num}
                     onClick={() => handlePinInput(num.toString())}
-                    className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                    className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                   >
                     {num}
                   </button>
                 ))}
                 <button
                   onClick={handleBackspace}
-                  className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                  className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                 >
                   ⌫
                 </button>
                 <button
                   onClick={() => handlePinInput('0')}
-                  className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                  className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                 >
                   0
                 </button>
@@ -379,7 +379,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                     }
                   }}
                   disabled={pin.length < 4}
-                  className="py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
+                  className="py-4 px-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
                 >
                   ✓
                 </button>
@@ -388,7 +388,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
           ) : (
             <>
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Confirm PIN
                 </label>
                 <div className="flex justify-center space-x-2 mb-4">
@@ -397,13 +397,13 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                       key={i}
                       className={`w-3 h-3 rounded-full border-2 ${
                         i < confirmPin.length
-                          ? 'bg-blue-600 border-blue-600'
-                          : 'border-gray-300'
+                          ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500'
+                          : 'border-gray-300 dark:border-gray-600'
                       }`}
                     />
                   ))}
                 </div>
-                <p className="text-center text-sm text-gray-500">{confirmPin.length} / 6</p>
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400">{confirmPin.length} / 6</p>
               </div>
 
               <div className="grid grid-cols-3 gap-3 mb-4">
@@ -411,20 +411,20 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                   <button
                     key={num}
                     onClick={() => handleConfirmPinInput(num.toString())}
-                    className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                    className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                   >
                     {num}
                   </button>
                 ))}
                 <button
                   onClick={handleConfirmPinBackspace}
-                  className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                  className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                 >
                   ⌫
                 </button>
                 <button
                   onClick={() => handleConfirmPinInput('0')}
-                  className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                  className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
                 >
                   0
                 </button>
@@ -438,7 +438,7 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                     }
                   }}
                   disabled={confirmPin.length < 4 || confirmPin.length !== pin.length}
-                  className="py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
+                  className="py-4 px-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
                 >
                   ✓
                 </button>
@@ -447,8 +447,8 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
           )}
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600 text-center">{error}</p>
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
             </div>
           )}
         </div>
@@ -458,13 +458,13 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
 
   if (isLocked) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl dark:shadow-2xl p-8 max-w-md w-full border border-gray-200 dark:border-slate-700">
           <div className="text-center mb-6">
-            <Lock className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900">App Locked</h1>
-            <p className="text-gray-600 mt-2">Enter your PIN to unlock</p>
-            <p className="text-xs text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
+            <Lock className="w-12 h-12 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">App Locked</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Enter your PIN to unlock</p>
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">You can use your keyboard or click the buttons</p>
           </div>
 
           <div className="mb-6">
@@ -474,13 +474,13 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
                   key={i}
                   className={`w-3 h-3 rounded-full border-2 ${
                     i < enteredPin.length
-                      ? 'bg-blue-600 border-blue-600'
-                      : 'border-gray-300'
+                      ? 'bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500'
+                      : 'border-gray-300 dark:border-gray-600'
                   }`}
                 />
               ))}
             </div>
-            <p className="text-center text-sm text-gray-500">{enteredPin.length} / 6</p>
+            <p className="text-center text-sm text-gray-500 dark:text-gray-400">{enteredPin.length} / 6</p>
           </div>
 
           <div className="grid grid-cols-3 gap-3 mb-4">
@@ -488,35 +488,35 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
               <button
                 key={num}
                 onClick={() => handlePinInput(num.toString())}
-                className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+                className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
               >
                 {num}
               </button>
             ))}
             <button
               onClick={handleBackspace}
-              className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+              className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
             >
               ⌫
             </button>
             <button
               onClick={() => handlePinInput('0')}
-              className="py-4 px-6 bg-gray-100 hover:bg-gray-200 rounded-lg text-xl font-semibold text-gray-800 transition-colors"
+              className="py-4 px-6 bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-lg text-xl font-semibold text-gray-800 dark:text-gray-200 transition-colors"
             >
               0
             </button>
             <button
               onClick={unlockApp}
               disabled={enteredPin.length < 4}
-              className="py-4 px-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
+              className="py-4 px-6 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed rounded-lg text-xl font-semibold text-white transition-colors"
             >
               Unlock
             </button>
           </div>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600 text-center">{error}</p>
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
             </div>
           )}
         </div>

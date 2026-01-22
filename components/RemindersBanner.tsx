@@ -32,20 +32,20 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
   return (
     <div className="space-y-3">
       {overdueSubscriptions.length > 0 && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+        <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-400 p-4 rounded-r-lg">
           <div className="flex items-center">
-            <AlertCircle className="w-5 h-5 text-red-500 mr-3" />
+            <AlertCircle className="w-5 h-5 text-red-500 dark:text-red-400 mr-3" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-red-800">
+              <h3 className="text-sm font-semibold text-red-800 dark:text-red-300">
                 {overdueSubscriptions.length} Overdue Subscription{overdueSubscriptions.length !== 1 ? 's' : ''}
               </h3>
-              <p className="text-sm text-red-700 mt-1">
+              <p className="text-sm text-red-700 dark:text-red-400 mt-1">
                 {overdueSubscriptions.map((sub) => sub.serviceName).join(', ')}
               </p>
             </div>
             <Link
               href="/subscriptions"
-              className="text-sm font-medium text-red-800 hover:text-red-900"
+              className="text-sm font-medium text-red-800 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 transition-colors"
             >
               View →
             </Link>
@@ -54,14 +54,14 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
       )}
 
       {upcomingSubscriptions.length > 0 && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-lg">
+        <div className="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500 dark:border-yellow-400 p-4 rounded-r-lg">
           <div className="flex items-center">
-            <Bell className="w-5 h-5 text-yellow-600 mr-3" />
+            <Bell className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mr-3" />
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-yellow-800">
+              <h3 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300">
                 {upcomingSubscriptions.length} Upcoming Subscription{upcomingSubscriptions.length !== 1 ? 's' : ''} (Next 7 Days)
               </h3>
-              <ul className="text-sm text-yellow-700 mt-1 space-y-1">
+              <ul className="text-sm text-yellow-700 dark:text-yellow-400 mt-1 space-y-1">
                 {upcomingSubscriptions.map((sub) => {
                   const daysUntil = differenceInDays(new Date(sub.nextDueDate), now)
                   return (
@@ -80,7 +80,7 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
             </div>
             <Link
               href="/subscriptions"
-              className="text-sm font-medium text-yellow-800 hover:text-yellow-900"
+              className="text-sm font-medium text-yellow-800 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-200 transition-colors"
             >
               View →
             </Link>
