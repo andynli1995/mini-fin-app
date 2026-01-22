@@ -38,9 +38,11 @@ export async function PUT(
     const newAmount = new Prisma.Decimal(amount)
     const walletChanged = existingTransaction.walletId !== walletId
 
-    // Update transaction and recalculate balances
+    // Update transaction and recalculate wallet balances
+    // When a transaction is updated, we must recalculate the balance for affected wallets
+    // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
     const updatedTransaction = await prisma.$transaction(async (tx) => {
-      // Update the transaction
+      // Step 1: Update the transaction
       await tx.transaction.update({
         where: { id: params.id },
         data: {
@@ -53,29 +55,33 @@ export async function PUT(
         },
       })
 
-      // Recalculate balances for affected wallets
-      // Balance = sum(income) - sum(expense) - sum(lend) - sum(rent)
+      // Step 2: Determine which wallets need balance recalculation
+      // If wallet changed, we need to update both old and new wallet
+      // If same wallet, we only need to update that wallet
       const walletsToUpdate = walletChanged 
         ? [existingTransaction.walletId, walletId]
         : [walletId]
 
+      // Step 3: Recalculate and update balance for each affected wallet
       for (const wId of walletsToUpdate) {
-        // Get all transactions for this wallet
+        // Get all transactions for this wallet (after the update)
         const transactions = await tx.transaction.findMany({
           where: { walletId: wId },
         })
 
-        // Calculate balance from transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+        // Recalculate balance from all transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
         let balance = new Prisma.Decimal(0)
         for (const t of transactions) {
           const amt = new Prisma.Decimal(t.amount)
           if (t.type === 'income') {
             balance = balance.plus(amt)
           } else {
+            // expense, lend, rent all subtract from balance
             balance = balance.minus(amt)
           }
         }
 
+        // Update wallet balance with recalculated value
         await tx.wallet.update({
           where: { id: wId },
           data: { balance },
