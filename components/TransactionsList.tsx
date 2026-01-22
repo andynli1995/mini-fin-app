@@ -113,7 +113,7 @@ export default function TransactionsList({ transactions }: TransactionsListProps
                     }`}
                   >
                     {transaction.type === 'income' ? '+' : '-'}$
-                    {Math.abs(transaction.amount).toLocaleString('en-US', {
+                    {Math.abs(Number(transaction.amount)).toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}

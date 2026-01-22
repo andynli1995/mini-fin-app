@@ -66,7 +66,7 @@ export default function WalletsList({ wallets }: WalletsListProps) {
             </div>
             <div className="mt-4">
               <p className="text-2xl font-bold text-gray-900">
-                {wallet.currency} {wallet.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                {wallet.currency} {Number(wallet.balance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 {wallet._count.transactions} transaction{wallet._count.transactions !== 1 ? 's' : ''}

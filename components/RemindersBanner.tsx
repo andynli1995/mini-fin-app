@@ -66,7 +66,7 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
                   const daysUntil = differenceInDays(new Date(sub.nextDueDate), now)
                   return (
                     <li key={sub.id}>
-                      {sub.serviceName} - ${sub.amount.toFixed(2)} due{' '}
+                      {sub.serviceName} - ${Number(sub.amount).toFixed(2)} due{' '}
                       {daysUntil === 0
                         ? 'today'
                         : daysUntil === 1

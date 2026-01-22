@@ -361,7 +361,7 @@ export default function ReportsView({
                     }`}
                   >
                     {transaction.type === 'income' ? '+' : '-'}$
-                    {Math.abs(transaction.amount).toFixed(2)}
+                    {Math.abs(Number(transaction.amount)).toFixed(2)}
                   </td>
                 </tr>
               ))}

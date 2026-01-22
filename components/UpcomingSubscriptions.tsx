@@ -55,7 +55,7 @@ export default function UpcomingSubscriptions({ subscriptions }: UpcomingSubscri
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-gray-900">
-                    ${subscription.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ${Number(subscription.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                   {daysUntil <= 7 && (
                     <div className="flex items-center justify-end mt-1">
