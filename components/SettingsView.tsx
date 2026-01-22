@@ -1,13 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Lock, Save } from 'lucide-react'
+import { Eye, EyeOff, Lock, Save, Download } from 'lucide-react'
+import { useInstallPWA } from './useInstallPWA'
 
 export default function SettingsView() {
   const [hasPin, setHasPin] = useState(false)
   const [hideBalancesByDefault, setHideBalancesByDefault] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const { install, canInstall, isInstalled, hasPrompt } = useInstallPWA()
   
   // PIN update form
   const [currentPin, setCurrentPin] = useState('')
@@ -259,6 +261,34 @@ export default function SettingsView() {
           <p className="text-sm text-yellow-800">
             PIN is not set. Set up a PIN from the lock screen to enable PIN management here.
           </p>
+        </div>
+      )}
+
+      {/* PWA Install */}
+      {canInstall && (
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+            <Download className="w-5 h-5 mr-2" />
+            Install App
+          </h2>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              {isInstalled
+                ? 'App is already installed on your device.'
+                : hasPrompt
+                  ? 'Install this app on your device for quick access and offline functionality.'
+                  : 'Add this app to your home screen for quick access and a better experience.'}
+            </p>
+            {!isInstalled && (
+              <button
+                onClick={install}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                {hasPrompt ? 'Install App' : 'Show Install Instructions'}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

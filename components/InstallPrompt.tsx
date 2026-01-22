@@ -2,63 +2,27 @@
 
 import { useState, useEffect } from 'react'
 import { Download, X } from 'lucide-react'
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
-}
+import { useInstallPWA } from './useInstallPWA'
 
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
+  const { install, canInstall, isInstalled, hasPrompt } = useInstallPWA()
 
   useEffect(() => {
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
-      return
-    }
+    if (isInstalled) return
 
-    // Check if app was previously installed
-    if (localStorage.getItem('pwa-installed') === 'true') {
-      setIsInstalled(true)
-      return
-    }
-
-    // Listen for the beforeinstallprompt event
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      // Show prompt after a delay (e.g., user has been on site for a bit)
-      setTimeout(() => {
+    // Show prompt after a delay if not dismissed
+    const timer = setTimeout(() => {
+      if (canInstall && !sessionStorage.getItem('pwa-prompt-dismissed')) {
         setShowPrompt(true)
-      }, 3000) // Show after 3 seconds
-    }
+      }
+    }, 3000) // Show after 3 seconds
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    }
-  }, [])
+    return () => clearTimeout(timer)
+  }, [canInstall, isInstalled])
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return
-
-    // Show the install prompt
-    deferredPrompt.prompt()
-
-    // Wait for the user to respond
-    const { outcome } = await deferredPrompt.userChoice
-
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', 'true')
-      setIsInstalled(true)
-    }
-
-    // Clear the deferred prompt
-    setDeferredPrompt(null)
+    await install()
     setShowPrompt(false)
   }
 
@@ -68,30 +32,38 @@ export default function InstallPrompt() {
     sessionStorage.setItem('pwa-prompt-dismissed', 'true')
   }
 
-  // Don't show if already installed or dismissed this session
-  if (isInstalled || !showPrompt || !deferredPrompt) {
+  // Don't show if already installed
+  if (isInstalled) {
     return null
   }
 
+  // Don't show if dismissed this session
   if (sessionStorage.getItem('pwa-prompt-dismissed') === 'true') {
     return null
   }
 
+  // Show if we can install (either via prompt or manually)
+  if (!showPrompt || !canInstall) {
+    return null
+  }
+
   return (
-    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 animate-slide-up">
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+    <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-[9999] animate-slide-up">
+      <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-gray-900 mb-1">
               Install Finance Manager
             </h3>
             <p className="text-xs text-gray-600">
-              Install this app on your device for quick access and a better experience.
+              {hasPrompt
+                ? 'Install this app on your device for quick access and a better experience.'
+                : 'Add this app to your home screen for quick access.'}
             </p>
           </div>
           <button
             onClick={handleDismiss}
-            className="text-gray-400 hover:text-gray-600 ml-2"
+            className="text-gray-400 hover:text-gray-600 ml-2 flex-shrink-0"
             aria-label="Dismiss"
           >
             <X className="w-4 h-4" />
@@ -100,14 +72,14 @@ export default function InstallPrompt() {
         <div className="flex gap-2">
           <button
             onClick={handleInstallClick}
-            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <Download className="w-4 h-4 mr-2" />
-            Install
+            {hasPrompt ? 'Install' : 'Show Instructions'}
           </button>
           <button
             onClick={handleDismiss}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
           >
             Not now
           </button>
