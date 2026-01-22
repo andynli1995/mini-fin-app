@@ -5,12 +5,17 @@ import { Wallet, Subscription } from '@prisma/client'
 import { Plus, X } from 'lucide-react'
 import { addMonths, addWeeks, addDays, addYears } from 'date-fns'
 
-interface SubscriptionWithWallet extends Subscription {
-  wallet: Wallet | null
+interface SubscriptionWithWallet extends Omit<Subscription, 'amount'> {
+  amount: number
+  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
+}
+
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
 }
 
 interface SubscriptionFormProps {
-  wallets: Wallet[]
+  wallets: WalletWithNumber[]
   subscription?: SubscriptionWithWallet
   onClose?: () => void
 }

@@ -6,13 +6,18 @@ import { format, differenceInDays } from 'date-fns'
 import { Calendar, AlertCircle, Trash2, CheckCircle, Edit } from 'lucide-react'
 import SubscriptionForm from './SubscriptionForm'
 
-interface SubscriptionWithWallet extends Subscription {
-  wallet: Wallet | null
+interface SubscriptionWithWallet extends Omit<Subscription, 'amount'> {
+  amount: number
+  wallet: (Omit<Wallet, 'balance'> & { balance: number }) | null
+}
+
+interface WalletWithNumber extends Omit<Wallet, 'balance'> {
+  balance: number
 }
 
 interface SubscriptionsListProps {
   subscriptions: SubscriptionWithWallet[]
-  wallets: Wallet[]
+  wallets: WalletWithNumber[]
 }
 
 export default function SubscriptionsList({ subscriptions, wallets }: SubscriptionsListProps) {
