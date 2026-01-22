@@ -6,7 +6,8 @@ import Link from 'next/link'
 import { Trash2, Edit } from 'lucide-react'
 import WalletForm from './WalletForm'
 
-interface WalletWithCount extends Wallet {
+interface WalletWithCount extends Omit<Wallet, 'balance'> {
+  balance: number
   _count: {
     transactions: number
   }
