@@ -12,7 +12,17 @@ export default async function Dashboard() {
     })
 
     // Convert Decimal to number for Client Components
-    const walletsWithNumbers = wallets.map((wallet) => ({
+    type WalletWithNumber = {
+      id: string
+      name: string
+      type: string
+      balance: number
+      currency: string
+      createdAt: Date
+      updatedAt: Date
+    }
+
+    const walletsWithNumbers: WalletWithNumber[] = wallets.map((wallet) => ({
       ...wallet,
       balance: Number(wallet.balance),
     }))
@@ -29,13 +39,44 @@ export default async function Dashboard() {
     })
 
     // Convert Decimal to number for Client Components
-    const recentTransactionsWithNumbers = recentTransactions.map((transaction) => ({
+    // Transactions always have a wallet (walletId is required in schema)
+    type TransactionWithNumbers = {
+      id: string
+      type: string
+      amount: number
+      date: Date
+      note: string | null
+      walletId: string
+      categoryId: string
+      createdAt: Date
+      updatedAt: Date
+      category: {
+        id: string
+        name: string
+        type: string
+        color: string | null
+        icon: string | null
+        createdAt: Date
+        updatedAt: Date
+      }
+      wallet: {
+        id: string
+        name: string
+        type: string
+        balance: number
+        currency: string
+        createdAt: Date
+        updatedAt: Date
+      }
+    }
+
+    const recentTransactionsWithNumbers: TransactionWithNumbers[] = recentTransactions.map((transaction) => ({
       ...transaction,
       amount: Number(transaction.amount),
-      wallet: transaction.wallet ? {
+      wallet: {
         ...transaction.wallet,
         balance: Number(transaction.wallet.balance),
-      } : null,
+      },
     }))
 
     const upcomingSubscriptions = await prisma.subscription.findMany({
@@ -64,7 +105,31 @@ export default async function Dashboard() {
     })
 
     // Convert Decimal to number for Client Components
-    const upcomingSubscriptionsWithNumbers = upcomingSubscriptions.map((subscription) => ({
+    type SubscriptionWithNumbers = {
+      id: string
+      serviceName: string
+      amount: number
+      period: string
+      startDate: Date
+      nextDueDate: Date
+      paymentMethod: string | null
+      walletId: string | null
+      isActive: boolean
+      note: string | null
+      createdAt: Date
+      updatedAt: Date
+      wallet: {
+        id: string
+        name: string
+        type: string
+        balance: number
+        currency: string
+        createdAt: Date
+        updatedAt: Date
+      } | null
+    }
+
+    const upcomingSubscriptionsWithNumbers: SubscriptionWithNumbers[] = upcomingSubscriptions.map((subscription) => ({
       ...subscription,
       amount: Number(subscription.amount),
       wallet: subscription.wallet ? {
@@ -73,7 +138,7 @@ export default async function Dashboard() {
       } : null,
     }))
 
-    const allActiveSubscriptionsWithNumbers = allActiveSubscriptions.map((subscription) => ({
+    const allActiveSubscriptionsWithNumbers: SubscriptionWithNumbers[] = allActiveSubscriptions.map((subscription) => ({
       ...subscription,
       amount: Number(subscription.amount),
       wallet: subscription.wallet ? {

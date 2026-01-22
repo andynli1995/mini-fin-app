@@ -48,7 +48,31 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
     updatedAt: Date
   }
 
-  const subscriptionsWithNumbers = subscriptions.map((subscription) => ({
+  type SubscriptionWithNumbers = {
+    id: string
+    serviceName: string
+    amount: number
+    period: string
+    startDate: Date
+    nextDueDate: Date
+    paymentMethod: string | null
+    walletId: string | null
+    isActive: boolean
+    note: string | null
+    createdAt: Date
+    updatedAt: Date
+    wallet: {
+      id: string
+      name: string
+      type: string
+      balance: number
+      currency: string
+      createdAt: Date
+      updatedAt: Date
+    } | null
+  }
+
+  const subscriptionsWithNumbers: SubscriptionWithNumbers[] = subscriptions.map((subscription) => ({
     ...subscription,
     amount: Number(subscription.amount),
     wallet: subscription.wallet ? {

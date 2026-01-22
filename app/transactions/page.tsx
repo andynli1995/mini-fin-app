@@ -53,7 +53,37 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
     updatedAt: Date
   }
 
-  const transactionsWithNumbers = transactions.map((transaction) => ({
+  type TransactionWithNumbers = {
+    id: string
+    type: string
+    amount: number
+    date: Date
+    note: string | null
+    walletId: string
+    categoryId: string
+    createdAt: Date
+    updatedAt: Date
+    category: {
+      id: string
+      name: string
+      type: string
+      color: string | null
+      icon: string | null
+      createdAt: Date
+      updatedAt: Date
+    }
+    wallet: {
+      id: string
+      name: string
+      type: string
+      balance: number
+      currency: string
+      createdAt: Date
+      updatedAt: Date
+    }
+  }
+
+  const transactionsWithNumbers: TransactionWithNumbers[] = transactions.map((transaction) => ({
     ...transaction,
     amount: Number(transaction.amount),
     wallet: {
