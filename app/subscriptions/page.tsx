@@ -38,6 +38,16 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
   })
 
   // Convert Decimal to number for Client Components
+  type WalletWithNumber = {
+    id: string
+    name: string
+    type: string
+    balance: number
+    currency: string
+    createdAt: Date
+    updatedAt: Date
+  }
+
   const subscriptionsWithNumbers = subscriptions.map((subscription) => ({
     ...subscription,
     amount: Number(subscription.amount),
@@ -47,7 +57,7 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
     } : null,
   }))
 
-  const walletsWithNumbers = wallets.map((wallet) => ({
+  const walletsWithNumbers: WalletWithNumber[] = wallets.map((wallet) => ({
     ...wallet,
     balance: Number(wallet.balance),
   }))

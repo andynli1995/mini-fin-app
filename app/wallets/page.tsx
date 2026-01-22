@@ -36,7 +36,20 @@ export default async function WalletsPage({ searchParams }: WalletsPageProps) {
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
 
   // Convert Decimal to number for Client Components
-  const walletsWithNumbers = wallets.map((wallet) => ({
+  type WalletWithCount = {
+    id: string
+    name: string
+    type: string
+    balance: number
+    currency: string
+    createdAt: Date
+    updatedAt: Date
+    _count: {
+      transactions: number
+    }
+  }
+
+  const walletsWithNumbers: WalletWithCount[] = wallets.map((wallet) => ({
     ...wallet,
     balance: Number(wallet.balance),
   }))
