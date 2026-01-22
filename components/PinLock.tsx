@@ -18,6 +18,36 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState('')
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null)
 
+  const lockApp = useCallback(() => {
+    setIsLocked(true)
+    localStorage.setItem(LOCK_STATE_KEY, 'true')
+    setEnteredPin('')
+    setError('')
+  }, [])
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current) {
+      clearTimeout(inactivityTimerRef.current)
+    }
+    inactivityTimerRef.current = setTimeout(() => {
+      lockApp()
+    }, INACTIVITY_TIMEOUT)
+  }, [lockApp])
+
+  const unlockApp = useCallback(() => {
+    const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
+    if (enteredPin === storedPin) {
+      setIsLocked(false)
+      localStorage.setItem(LOCK_STATE_KEY, 'false')
+      setEnteredPin('')
+      setError('')
+      resetInactivityTimer()
+    } else {
+      setError('Incorrect PIN. Please try again.')
+      setEnteredPin('')
+    }
+  }, [enteredPin, resetInactivityTimer])
+
   useEffect(() => {
     // Check if PIN exists
     const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
@@ -53,36 +83,6 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
       }
     }
   }, [isLocked, hasPin, resetInactivityTimer])
-
-  const lockApp = useCallback(() => {
-    setIsLocked(true)
-    localStorage.setItem(LOCK_STATE_KEY, 'true')
-    setEnteredPin('')
-    setError('')
-  }, [])
-
-  const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimerRef.current) {
-      clearTimeout(inactivityTimerRef.current)
-    }
-    inactivityTimerRef.current = setTimeout(() => {
-      lockApp()
-    }, INACTIVITY_TIMEOUT)
-  }, [lockApp])
-
-  const unlockApp = useCallback(() => {
-    const storedPin = localStorage.getItem(PIN_STORAGE_KEY)
-    if (enteredPin === storedPin) {
-      setIsLocked(false)
-      localStorage.setItem(LOCK_STATE_KEY, 'false')
-      setEnteredPin('')
-      setError('')
-      resetInactivityTimer()
-    } else {
-      setError('Incorrect PIN. Please try again.')
-      setEnteredPin('')
-    }
-  }, [enteredPin, resetInactivityTimer])
 
   const setupPin = () => {
     if (pin.length < 4) {
