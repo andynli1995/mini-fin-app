@@ -7,12 +7,24 @@ export default function ServiceWorkerRegistration() {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       // Register service worker
       navigator.serviceWorker
-        .register('/sw.js')
+        .register('/sw.js', { scope: '/' })
         .then((registration) => {
           console.log('Service Worker registered:', registration)
+          
+          // Check for updates
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('New service worker available')
+                }
+              })
+            }
+          })
         })
         .catch((error) => {
-          console.log('Service Worker registration failed:', error)
+          console.error('Service Worker registration failed:', error)
         })
     }
   }, [])
