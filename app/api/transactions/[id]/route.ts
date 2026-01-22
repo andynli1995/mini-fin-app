@@ -20,14 +20,13 @@ export async function PUT(
     // Get existing transaction
     const existingTransaction = await prisma.transaction.findUnique({
       where: { id: params.id },
-      include: { wallet: true },
     })
 
     if (!existingTransaction) {
       return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
     }
 
-    // Get new wallet if changed
+    // Verify new wallet exists
     const newWallet = await prisma.wallet.findUnique({
       where: { id: walletId },
     })
@@ -36,13 +35,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Wallet not found' }, { status: 404 })
     }
 
-    // Calculate balance adjustments
-    const oldAmount = new Prisma.Decimal(existingTransaction.amount)
     const newAmount = new Prisma.Decimal(amount)
     const walletChanged = existingTransaction.walletId !== walletId
-    
-    const updates: any[] = [
-      prisma.transaction.update({
+
+    // Update transaction and recalculate balances
+    const updatedTransaction = await prisma.$transaction(async (tx) => {
+      // Update the transaction
+      await tx.transaction.update({
         where: { id: params.id },
         data: {
           type,
@@ -52,81 +51,42 @@ export async function PUT(
           categoryId,
           walletId,
         },
-      }),
-    ]
+      })
 
-    if (walletChanged) {
-      // Wallet changed: reverse old transaction from old wallet, apply new to new wallet
-      const oldWalletBalance = new Prisma.Decimal(existingTransaction.wallet.balance)
-      const newWalletBalance = new Prisma.Decimal(newWallet.balance)
+      // Recalculate balances for affected wallets
+      const walletsToUpdate = walletChanged 
+        ? [existingTransaction.walletId, walletId]
+        : [walletId]
 
-      // Reverse old transaction effect on the original wallet
-      let oldWalletNewBalance: Prisma.Decimal
-      if (existingTransaction.type === 'income') {
-        oldWalletNewBalance = oldWalletBalance.minus(oldAmount)
-      } else {
-        // Reverse expense/lend/rent by adding the amount back
-        oldWalletNewBalance = oldWalletBalance.plus(oldAmount)
-      }
-
-      // Apply new transaction effect on the target wallet
-      let finalNewWalletBalance: Prisma.Decimal
-      if (type === 'income') {
-        finalNewWalletBalance = newWalletBalance.plus(newAmount)
-      } else {
-        // All other types (expense, lend, rent) reduce the wallet balance
-        finalNewWalletBalance = newWalletBalance.minus(newAmount)
-      }
-
-      updates.push(
-        prisma.wallet.update({
-          where: { id: existingTransaction.walletId },
-          data: { balance: oldWalletNewBalance },
-        }),
-        prisma.wallet.update({
-          where: { id: walletId },
-          data: { balance: finalNewWalletBalance },
+      for (const wId of walletsToUpdate) {
+        const transactions = await tx.transaction.findMany({
+          where: { walletId: wId },
         })
-      )
-    } else {
-      // Same wallet: reverse old transaction and apply new transaction
-      const currentBalance = new Prisma.Decimal(existingTransaction.wallet.balance)
-      
-      // Step 1: Reverse old transaction
-      let balanceAfterReverse: Prisma.Decimal
-      if (existingTransaction.type === 'income') {
-        balanceAfterReverse = currentBalance.minus(oldAmount)
-      } else {
-        // Reverse expense/lend/rent by adding back
-        balanceAfterReverse = currentBalance.plus(oldAmount)
-      }
-      
-      // Step 2: Apply new transaction
-      let finalBalance: Prisma.Decimal
-      if (type === 'income') {
-        finalBalance = balanceAfterReverse.plus(newAmount)
-      } else {
-        // All other types (expense, lend, rent) reduce the wallet balance
-        finalBalance = balanceAfterReverse.minus(newAmount)
-      }
 
-      updates.push(
-        prisma.wallet.update({
-          where: { id: walletId },
-          data: { balance: finalBalance },
+        let balance = new Prisma.Decimal(0)
+        for (const t of transactions) {
+          const amt = new Prisma.Decimal(t.amount)
+          if (t.type === 'income') {
+            balance = balance.plus(amt)
+          } else {
+            // expense, lend, rent all subtract
+            balance = balance.minus(amt)
+          }
+        }
+
+        await tx.wallet.update({
+          where: { id: wId },
+          data: { balance },
         })
-      )
-    }
+      }
 
-    // Execute all updates in a transaction
-    await prisma.$transaction(updates)
-
-    const updatedTransaction = await prisma.transaction.findUnique({
-      where: { id: params.id },
-      include: {
-        category: true,
-        wallet: true,
-      },
+      return await tx.transaction.findUnique({
+        where: { id: params.id },
+        include: {
+          category: true,
+          wallet: true,
+        },
+      })
     })
 
     return NextResponse.json(updatedTransaction)
@@ -146,36 +106,41 @@ export async function DELETE(
   try {
     const transaction = await prisma.transaction.findUnique({
       where: { id: params.id },
-      include: { wallet: true },
     })
 
     if (!transaction) {
       return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
     }
 
-    // Calculate new balance (reverse the transaction effect)
-    // If it was income, subtract it; if it was expense/lend/rent, add it back
-    const currentBalance = new Prisma.Decimal(transaction.wallet.balance)
-    const amountDecimal = new Prisma.Decimal(transaction.amount)
-    let newBalance: Prisma.Decimal
-    if (transaction.type === 'income') {
-      // Reverse income by subtracting
-      newBalance = currentBalance.minus(amountDecimal)
-    } else {
-      // Reverse expense/lend/rent by adding back
-      newBalance = currentBalance.plus(amountDecimal)
-    }
+    const walletId = transaction.walletId
 
-    // Delete transaction and update wallet balance
-    await prisma.$transaction([
-      prisma.transaction.delete({
+    // Delete transaction and recalculate wallet balance
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.delete({
         where: { id: params.id },
-      }),
-      prisma.wallet.update({
-        where: { id: transaction.walletId },
-        data: { balance: newBalance },
-      }),
-    ])
+      })
+
+      // Recalculate balance from all remaining transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const transactions = await tx.transaction.findMany({
+        where: { walletId },
+      })
+
+      let balance = new Prisma.Decimal(0)
+      for (const t of transactions) {
+        const amt = new Prisma.Decimal(t.amount)
+        if (t.type === 'income') {
+          balance = balance.plus(amt)
+        } else {
+          // expense, lend, rent all subtract
+          balance = balance.minus(amt)
+        }
+      }
+
+      await tx.wallet.update({
+        where: { id: walletId },
+        data: { balance },
+      })
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

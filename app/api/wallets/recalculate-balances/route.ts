@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const updates = []
 
     for (const wallet of wallets) {
-      // Calculate balance from transactions only
+      // Calculate balance from transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
       let calculatedFromTransactions = new Prisma.Decimal(0)
       
       // Process all transactions
@@ -39,6 +39,9 @@ export async function POST(request: NextRequest) {
           calculatedFromTransactions = calculatedFromTransactions.minus(amount)
         }
       }
+      
+      // Balance should equal calculated from transactions (no initial balance concept)
+      // If wallet was created with initial balance, it should have been a transaction
 
       const storedBalance = new Prisma.Decimal(wallet.balance)
       

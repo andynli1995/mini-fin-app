@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
+import { updateWalletBalance } from '@/lib/balance-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get wallet to update balance
+    // Verify wallet exists
     const wallet = await prisma.wallet.findUnique({
       where: { id: walletId },
     })
@@ -24,25 +25,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Wallet not found' }, { status: 404 })
     }
 
-    // Calculate new balance
-    // Balance calculation logic:
-    // - 'income' → adds to wallet balance (money coming in)
-    // - 'expense' → subtracts from wallet balance (money going out)
-    // - 'lend' → subtracts from wallet balance (money lent out)
-    // - 'rent' → subtracts from wallet balance (rent paid out)
-    const currentBalance = new Prisma.Decimal(wallet.balance)
     const amountDecimal = new Prisma.Decimal(amount)
-    let newBalance: Prisma.Decimal
-    if (type === 'income') {
-      newBalance = currentBalance.plus(amountDecimal)
-    } else {
-      // All other types (expense, lend, rent) reduce the wallet balance
-      newBalance = currentBalance.minus(amountDecimal)
-    }
 
-    // Create transaction and update wallet balance in a transaction
-    const result = await prisma.$transaction([
-      prisma.transaction.create({
+    // Create transaction and recalculate wallet balance
+    const result = await prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.create({
         data: {
           type,
           amount: amountDecimal,
@@ -51,14 +38,33 @@ export async function POST(request: NextRequest) {
           categoryId,
           walletId,
         },
-      }),
-      prisma.wallet.update({
-        where: { id: walletId },
-        data: { balance: newBalance },
-      }),
-    ])
+      })
 
-    return NextResponse.json(result[0], { status: 201 })
+      // Recalculate balance from all transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const transactions = await tx.transaction.findMany({
+        where: { walletId },
+      })
+
+      let balance = new Prisma.Decimal(0)
+      for (const t of transactions) {
+        const amt = new Prisma.Decimal(t.amount)
+        if (t.type === 'income') {
+          balance = balance.plus(amt)
+        } else {
+          // expense, lend, rent all subtract
+          balance = balance.minus(amt)
+        }
+      }
+
+      await tx.wallet.update({
+        where: { id: walletId },
+        data: { balance },
+      })
+
+      return transaction
+    })
+
+    return NextResponse.json(result, { status: 201 })
   } catch (error) {
     console.error('Error creating transaction:', error)
     return NextResponse.json(

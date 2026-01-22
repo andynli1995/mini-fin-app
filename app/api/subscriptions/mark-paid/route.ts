@@ -69,14 +69,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create transaction and update subscription
-    // Marking subscription as paid creates an expense transaction and reduces wallet balance
-    const wallet = subscription.wallet!
-    const currentBalance = new Prisma.Decimal(wallet.balance)
-    const amountDecimal = new Prisma.Decimal(subscription.amount)
-    const newBalance = currentBalance.minus(amountDecimal)
-
-    await prisma.$transaction([
-      prisma.transaction.create({
+    // Marking subscription as paid creates an expense transaction
+    await prisma.$transaction(async (tx) => {
+      await tx.transaction.create({
         data: {
           type: 'expense',
           amount: subscription.amount,
@@ -85,16 +80,34 @@ export async function POST(request: NextRequest) {
           categoryId: category.id,
           walletId: subscription.walletId,
         },
-      }),
-      prisma.wallet.update({
+      })
+
+      // Recalculate wallet balance from all transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
+      const transactions = await tx.transaction.findMany({
+        where: { walletId: subscription.walletId },
+      })
+
+      let balance = new Prisma.Decimal(0)
+      for (const t of transactions) {
+        const amt = new Prisma.Decimal(t.amount)
+        if (t.type === 'income') {
+          balance = balance.plus(amt)
+        } else {
+          // expense, lend, rent all subtract
+          balance = balance.minus(amt)
+        }
+      }
+
+      await tx.wallet.update({
         where: { id: subscription.walletId },
-        data: { balance: newBalance },
-      }),
-      prisma.subscription.update({
+        data: { balance },
+      })
+
+      await tx.subscription.update({
         where: { id: subscriptionId },
         data: { nextDueDate },
-      }),
-    ])
+      })
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
