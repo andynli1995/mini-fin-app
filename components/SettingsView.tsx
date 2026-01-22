@@ -239,7 +239,7 @@ export default function SettingsView() {
               <select
                 value={lockTimeoutMinutes}
                 onChange={(e) => setLockTimeoutMinutes(parseInt(e.target.value, 10))}
-                className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                  className="block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
               >
                 <option value={5}>5 minutes</option>
                 <option value={10}>10 minutes</option>
@@ -277,7 +277,7 @@ export default function SettingsView() {
                   type={showCurrentPin ? 'text' : 'password'}
                   value={currentPin}
                   onChange={(e) => setCurrentPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
+                  className="block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                 />
                 <button
@@ -303,7 +303,7 @@ export default function SettingsView() {
                   type={showNewPin ? 'text' : 'password'}
                   value={newPin}
                   onChange={(e) => setNewPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
+                  className="block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                   minLength={4}
                   maxLength={6}
@@ -331,7 +331,7 @@ export default function SettingsView() {
                   type={showConfirmPin ? 'text' : 'password'}
                   value={confirmNewPin}
                   onChange={(e) => setConfirmNewPin(e.target.value)}
-                  className="block w-full rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
+                  className="block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 pr-10"
                   required
                   minLength={4}
                   maxLength={6}
