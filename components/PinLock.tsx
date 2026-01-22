@@ -40,7 +40,19 @@ export default function PinLock({ children }: { children: React.ReactNode }) {
         if (response.ok) {
           const data = await response.json()
           setHasPin(data.hasPin)
-          setIsLocked(data.isLocked || false)
+          // Lock by default on first load if PIN exists
+          // This ensures the app is always locked when opened, even if isLocked was false in DB
+          if (data.hasPin) {
+            setIsLocked(true)
+            // Update database to reflect locked state
+            await fetch('/api/settings/pin', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ isLocked: true }),
+            })
+          } else {
+            setIsLocked(false)
+          }
           setIsSettingUp(!data.hasPin)
         }
       } catch (error) {
