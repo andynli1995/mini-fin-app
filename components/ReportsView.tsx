@@ -251,7 +251,8 @@ export default function ReportsView({
           </p>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 border border-gray-200 dark:border-slate-700">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Net Balance</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Net from Filtered Transactions</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">(Income - Expenses - Lend - Rent)</p>
           <p
             className={`text-xl sm:text-2xl font-bold mt-1 ${
               totals.net >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'

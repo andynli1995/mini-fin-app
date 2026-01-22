@@ -42,19 +42,23 @@ export async function PUT(
     const oldWalletBalance = new Prisma.Decimal(existingTransaction.wallet.balance)
     const newWalletBalance = new Prisma.Decimal(newWallet.balance)
 
-    // Reverse old transaction effect
+    // Reverse old transaction effect on the original wallet
+    // If it was income, we subtract it back; if it was expense/lend/rent, we add it back
     let oldWalletNewBalance: Prisma.Decimal
     if (existingTransaction.type === 'income') {
       oldWalletNewBalance = oldWalletBalance.minus(oldAmount)
     } else {
+      // Reverse expense/lend/rent by adding the amount back
       oldWalletNewBalance = oldWalletBalance.plus(oldAmount)
     }
 
-    // Apply new transaction effect
+    // Apply new transaction effect on the target wallet
+    // Income adds to balance; expense/lend/rent subtracts from balance
     let finalNewWalletBalance: Prisma.Decimal
     if (type === 'income') {
       finalNewWalletBalance = newWalletBalance.plus(newAmount)
     } else {
+      // All other types (expense, lend, rent) reduce the wallet balance
       finalNewWalletBalance = newWalletBalance.minus(newAmount)
     }
 
@@ -113,13 +117,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
     }
 
-    // Calculate new balance (reverse the transaction)
+    // Calculate new balance (reverse the transaction effect)
+    // If it was income, subtract it; if it was expense/lend/rent, add it back
     const currentBalance = new Prisma.Decimal(transaction.wallet.balance)
     const amountDecimal = new Prisma.Decimal(transaction.amount)
     let newBalance: Prisma.Decimal
     if (transaction.type === 'income') {
+      // Reverse income by subtracting
       newBalance = currentBalance.minus(amountDecimal)
     } else {
+      // Reverse expense/lend/rent by adding back
       newBalance = currentBalance.plus(amountDecimal)
     }
 

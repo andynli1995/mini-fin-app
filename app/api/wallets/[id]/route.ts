@@ -16,14 +16,23 @@ export async function PUT(
       )
     }
 
+    // Note: Balance can be manually updated here, but this should be used carefully.
+    // The balance is normally maintained automatically by transaction operations.
+    // Manual balance changes can cause inconsistencies if they don't match the sum of transactions.
+    const updateData: any = {
+      name,
+      type,
+      currency: currency || 'USD',
+    }
+    
+    // Only update balance if explicitly provided
+    if (balance !== undefined) {
+      updateData.balance = parseFloat(balance)
+    }
+
     const wallet = await prisma.wallet.update({
       where: { id: params.id },
-      data: {
-        name,
-        type,
-        currency: currency || 'USD',
-        balance: balance ? parseFloat(balance) : undefined,
-      },
+      data: updateData,
     })
 
     return NextResponse.json(wallet)

@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create transaction and update subscription
+    // Marking subscription as paid creates an expense transaction and reduces wallet balance
     const wallet = subscription.wallet!
     const currentBalance = new Prisma.Decimal(wallet.balance)
     const amountDecimal = new Prisma.Decimal(subscription.amount)

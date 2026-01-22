@@ -25,12 +25,18 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate new balance
+    // Balance calculation logic:
+    // - 'income' → adds to wallet balance (money coming in)
+    // - 'expense' → subtracts from wallet balance (money going out)
+    // - 'lend' → subtracts from wallet balance (money lent out)
+    // - 'rent' → subtracts from wallet balance (rent paid out)
     const currentBalance = new Prisma.Decimal(wallet.balance)
     const amountDecimal = new Prisma.Decimal(amount)
     let newBalance: Prisma.Decimal
     if (type === 'income') {
       newBalance = currentBalance.plus(amountDecimal)
     } else {
+      // All other types (expense, lend, rent) reduce the wallet balance
       newBalance = currentBalance.minus(amountDecimal)
     }
 
