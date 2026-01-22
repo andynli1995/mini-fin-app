@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import PinLock from "@/components/PinLock";
 import InstallPrompt from "@/components/InstallPrompt";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
   title: "Personal Finance Manager",
@@ -42,6 +43,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Finance Manager" />
       </head>
       <body>
+        <ServiceWorkerRegistration />
         <PinLock>
           {children}
           <InstallPrompt />
