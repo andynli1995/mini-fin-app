@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Lock } from 'lucide-react'
+import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Lock, Cog } from 'lucide-react'
 import { usePinLock } from './PinLock'
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { href: '/wallets', label: 'Wallets', icon: Wallet },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/categories', label: 'Categories', icon: Settings },
+  { href: '/settings', label: 'Settings', icon: Cog },
 ]
 
 export default function Navigation() {

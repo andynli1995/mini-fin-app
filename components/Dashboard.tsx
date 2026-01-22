@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { format } from 'date-fns'
 import WalletCard from './WalletCard'
 import RecentTransactions from './RecentTransactions'
 import UpcomingSubscriptions from './UpcomingSubscriptions'
 import RemindersBanner from './RemindersBanner'
+import BalanceDisplay from './BalanceDisplay'
 
 export default async function Dashboard() {
   try {
@@ -47,10 +47,13 @@ export default async function Dashboard() {
       },
     })
 
+    // Get settings for default balance visibility
+    const settings = await prisma.appSettings.findFirst()
+
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="mt-2 text-sm text-gray-600">
             Overview of your financial status
           </p>
@@ -60,19 +63,22 @@ export default async function Dashboard() {
         <RemindersBanner subscriptions={allActiveSubscriptions} />
 
         {/* Total Balance Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-4 sm:p-6 text-white">
-          <p className="text-blue-100 text-sm font-medium">Total Balance</p>
-          <p className="text-2xl sm:text-4xl font-bold mt-2">
-            ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-        </div>
+        <BalanceDisplay
+          label="Total Balance"
+          amount={totalBalance}
+          defaultHidden={settings?.hideBalancesByDefault || false}
+        />
 
         {/* Wallets Grid */}
         <div>
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Wallets</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {wallets.map((wallet) => (
-              <WalletCard key={wallet.id} wallet={wallet} />
+              <WalletCard
+                key={wallet.id}
+                wallet={wallet}
+                defaultHidden={settings?.hideBalancesByDefault || false}
+              />
             ))}
             {wallets.length === 0 && (
               <div className="col-span-full text-center py-8 text-gray-500">
@@ -97,41 +103,43 @@ export default async function Dashboard() {
     const isDirectConnection = errorMessage.includes(':5432')
     const isPoolerConnection = errorMessage.includes(':6543')
     const isTableMissing = errorMessage.includes('does not exist') || errorMessage.includes('table')
-    
+    const isCircuitBreaker = errorMessage.includes('Circuit breaker') || errorMessage.includes('Failed to retrieve database credentials')
+
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="mt-2 text-sm text-gray-600">
             Overview of your financial status
           </p>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Database Connection Error</h2>
-          <p className="text-red-700 mb-4">
+
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
+          <h3 className="text-sm font-semibold text-red-800 mb-2">Database Connection Error</h3>
+          <p className="text-sm text-red-700 mb-2">
             Unable to connect to the database. Please check your connection settings.
           </p>
+          <p className="text-sm text-red-700 mb-3">
+            <strong>Technical Details:</strong> {errorMessage}
+          </p>
           
-          {isDirectConnection && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Using Direct Connection (Port 5432)</h3>
-              <p className="text-sm text-yellow-700 mb-2">
-                Your connection string is using the direct database connection (port 5432), which may not work on Vercel.
+          {isCircuitBreaker && (
+            <div className="bg-red-100 rounded p-3 mb-3">
+              <p className="text-sm text-red-900 mb-2">
+                <strong>Circuit Breaker Error:</strong> Too many failed connection attempts detected.
               </p>
-              <p className="text-sm text-yellow-700 mb-2">
-                <strong>Solution:</strong> Update your Vercel environment variable to use the connection pooler (port 6543):
+              <p className="text-sm text-red-900 mb-2">
+                <strong>Solutions:</strong>
               </p>
-              <ol className="text-sm text-yellow-700 list-decimal list-inside space-y-1 ml-2">
-                <li>Go to Supabase Dashboard → Settings → Database → Connection Pooling</li>
-                <li>Select &quot;Transaction&quot; mode</li>
-                <li>Copy the connection string (it will use port 6543)</li>
-                <li>Update <code className="bg-yellow-100 px-1 rounded">DATABASE_URL</code> in Vercel with this pooler URL</li>
-                <li>Make sure it includes <code className="bg-yellow-100 px-1 rounded">?pgbouncer=true&amp;connection_limit=1</code></li>
-                <li>Redeploy your Vercel project</li>
+              <ol className="text-sm text-red-900 list-decimal list-inside space-y-1">
+                <li>Wait 5-10 minutes for the circuit breaker to reset</li>
+                <li>Verify your connection string includes <code className="bg-red-200 px-1 rounded">?pgbouncer=true&connection_limit=1</code></li>
+                <li>Check that you&apos;re using the connection pooler URL (port 6543) for Vercel</li>
+                <li>As a workaround, you can try using the direct connection (port 5432) temporarily</li>
               </ol>
             </div>
           )}
-          
+
           {isTableMissing && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
               <h3 className="text-sm font-semibold text-blue-800 mb-2">📋 Database Schema Not Created</h3>
@@ -155,43 +163,22 @@ export default async function Dashboard() {
             </div>
           )}
           
-          {(isPoolerConnection || errorMessage.includes('Circuit breaker')) && !isTableMissing && (
+          {!isCircuitBreaker && !isTableMissing && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
-              <h3 className="text-sm font-semibold text-yellow-800 mb-2">⚠️ Circuit Breaker Open</h3>
-              <p className="text-sm text-yellow-700 mb-2">
-                Supabase has temporarily blocked connections due to too many failed attempts. This is a protection mechanism.
-              </p>
-              <p className="text-sm text-yellow-700 mb-3">
-                <strong>Solutions:</strong>
-              </p>
-              <ol className="text-sm text-yellow-700 list-decimal list-inside space-y-2 ml-2">
-                <li>
-                  <strong>Wait 5-10 minutes</strong> for the circuit breaker to reset automatically, then refresh the page
-                </li>
-                <li>
-                  <strong>Verify your connection string</strong> in Vercel:
-                  <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
-                    <li>Should use port <code className="bg-yellow-100 px-1 rounded">6543</code> (pooler), not 5432</li>
-                    <li>Should include <code className="bg-yellow-100 px-1 rounded">?pgbouncer=true&amp;connection_limit=1</code></li>
-                    <li>Username format: <code className="bg-yellow-100 px-1 rounded">postgres.[PROJECT-REF]</code></li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Get fresh connection string</strong> from Supabase Dashboard → Settings → Database → Connection Pooling → Transaction mode
-                </li>
-                <li>
-                  <strong>Reduce connection attempts</strong> by ensuring <code className="bg-yellow-100 px-1 rounded">connection_limit=1</code> is in your URL
-                </li>
+              <h3 className="text-sm font-semibold text-yellow-800 mb-2">Troubleshooting Steps</h3>
+              <ol className="text-sm text-yellow-900 list-decimal list-inside space-y-1">
+                <li>Check your <code className="bg-yellow-200 px-1 rounded">DATABASE_URL</code> environment variable</li>
+                {isDirectConnection && (
+                  <li>For Vercel, use the connection pooler URL (port 6543) instead of direct connection (port 5432)</li>
+                )}
+                {isPoolerConnection && (
+                  <li>Make sure your connection string includes <code className="bg-yellow-200 px-1 rounded">?pgbouncer=true&connection_limit=1</code></li>
+                )}
+                <li>Verify your Supabase project is active and not paused</li>
+                <li>Check Supabase Dashboard → Settings → Database for the correct connection string</li>
               </ol>
             </div>
           )}
-          
-          <details className="mt-4">
-            <summary className="text-sm text-red-600 cursor-pointer">Technical Details</summary>
-            <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-auto">
-              {errorMessage}
-            </pre>
-          </details>
         </div>
       </div>
     )

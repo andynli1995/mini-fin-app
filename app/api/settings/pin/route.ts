@@ -65,7 +65,7 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { pin, isLocked } = body
+    const { pin, isLocked, newPin } = body
 
     let settings = await prisma.appSettings.findFirst()
     
@@ -76,8 +76,32 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Verify PIN if provided
-    if (pin) {
+    // If updating PIN, verify old PIN first
+    if (newPin) {
+      if (!pin) {
+        return NextResponse.json(
+          { error: 'Current PIN is required to update PIN' },
+          { status: 400 }
+        )
+      }
+      const pinHash = hashPin(pin)
+      if (settings.pinHash !== pinHash) {
+        return NextResponse.json(
+          { error: 'Incorrect current PIN' },
+          { status: 401 }
+        )
+      }
+      // Update to new PIN
+      const newPinHash = hashPin(newPin)
+      settings = await prisma.appSettings.update({
+        where: { id: settings.id },
+        data: { pinHash: newPinHash },
+      })
+      return NextResponse.json({ success: true, message: 'PIN updated successfully' })
+    }
+
+    // Verify PIN if provided (for unlock)
+    if (pin && !newPin) {
       const pinHash = hashPin(pin)
       if (settings.pinHash !== pinHash) {
         return NextResponse.json(
