@@ -17,9 +17,10 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-interface TransactionWithRelations extends Transaction {
+interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
+  amount: number
   category: Category
-  wallet: Wallet
+  wallet: Omit<Wallet, 'balance'> & { balance: number }
 }
 
 interface ReportsViewProps {
