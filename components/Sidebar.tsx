@@ -44,7 +44,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       <aside
         className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 z-50 transform transition-all duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 lg:static lg:top-0 lg:h-full lg:z-auto w-64 flex-shrink-0 ${
+        } lg:translate-x-0 lg:static lg:top-0 lg:h-[calc(100vh-4rem)] lg:z-auto w-64 flex-shrink-0 ${
           !isOpen ? 'lg:hidden' : ''
         }`}
       >
