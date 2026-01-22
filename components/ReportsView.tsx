@@ -93,16 +93,16 @@ export default function ReportsView({
   const totals = useMemo(() => {
     const income = filteredTransactions
       .filter((t) => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
     const expense = filteredTransactions
       .filter((t) => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
     const lend = filteredTransactions
       .filter((t) => t.type === 'lend')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
     const rent = filteredTransactions
       .filter((t) => t.type === 'rent')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + Number(t.amount), 0)
 
     return { income, expense, lend, rent, net: income - expense - lend - rent }
   }, [filteredTransactions])
@@ -113,7 +113,7 @@ export default function ReportsView({
     filteredTransactions.forEach((t) => {
       if (t.type === 'expense' || t.type === 'income') {
         const current = categoryMap.get(t.category.name) || 0
-        categoryMap.set(t.category.name, current + t.amount)
+        categoryMap.set(t.category.name, current + Number(t.amount))
       }
     })
 
@@ -140,9 +140,9 @@ export default function ReportsView({
       const month = format(new Date(t.date), 'MMM yyyy')
       const current = monthMap.get(month) || { income: 0, expense: 0 }
       if (t.type === 'income') {
-        current.income += t.amount
+        current.income += Number(t.amount)
       } else if (t.type === 'expense') {
-        current.expense += t.amount
+        current.expense += Number(t.amount)
       }
       monthMap.set(month, current)
     })

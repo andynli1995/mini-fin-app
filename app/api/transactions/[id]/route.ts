@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function DELETE(
   request: NextRequest,
@@ -16,11 +17,13 @@ export async function DELETE(
     }
 
     // Calculate new balance (reverse the transaction)
-    let newBalance = transaction.wallet.balance
+    const currentBalance = new Prisma.Decimal(transaction.wallet.balance)
+    const amountDecimal = new Prisma.Decimal(transaction.amount)
+    let newBalance: Prisma.Decimal
     if (transaction.type === 'income') {
-      newBalance -= transaction.amount
+      newBalance = currentBalance.minus(amountDecimal)
     } else {
-      newBalance += transaction.amount
+      newBalance = currentBalance.plus(amountDecimal)
     }
 
     // Delete transaction and update wallet balance

@@ -23,7 +23,7 @@ A clean, simple, and straightforward web-based personal financial management app
 - **Framework**: Next.js 14 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Database**: SQLite (via Prisma)
+- **Database**: PostgreSQL (Supabase)
 - **ORM**: Prisma
 - **Charts**: Recharts
 - **Icons**: Lucide React
@@ -42,18 +42,26 @@ A clean, simple, and straightforward web-based personal financial management app
 npm install
 ```
 
-2. Set up the database:
+2. Set up Supabase:
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Go to Settings > Database to get your connection string
+   - Create a `.env` file in the root directory:
+   ```bash
+   DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@[YOUR-PROJECT-REF].supabase.co:5432/postgres?pgbouncer=true&connection_limit=1"
+   ```
+
+3. Set up the database:
 ```bash
 npx prisma generate
 npx prisma db push
 ```
 
-3. Run the development server:
+4. Run the development server:
 ```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ### Database Management
 

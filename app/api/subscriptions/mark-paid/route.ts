@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import { addMonths, addWeeks, addDays, addYears } from 'date-fns'
 
 export async function POST(request: NextRequest) {
@@ -69,7 +70,9 @@ export async function POST(request: NextRequest) {
 
     // Create transaction and update subscription
     const wallet = subscription.wallet!
-    const newBalance = wallet.balance - subscription.amount
+    const currentBalance = new Prisma.Decimal(wallet.balance)
+    const amountDecimal = new Prisma.Decimal(subscription.amount)
+    const newBalance = currentBalance.minus(amountDecimal)
 
     await prisma.$transaction([
       prisma.transaction.create({

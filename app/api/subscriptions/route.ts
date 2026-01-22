@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     const subscription = await prisma.subscription.create({
       data: {
         serviceName,
-        amount: parseFloat(amount),
+        amount: new Prisma.Decimal(amount),
         period,
         startDate: new Date(startDate),
         nextDueDate: new Date(nextDueDate),

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,11 +25,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Calculate new balance
-    let newBalance = wallet.balance
+    const currentBalance = new Prisma.Decimal(wallet.balance)
+    const amountDecimal = new Prisma.Decimal(amount)
+    let newBalance: Prisma.Decimal
     if (type === 'income') {
-      newBalance += amount
+      newBalance = currentBalance.plus(amountDecimal)
     } else {
-      newBalance -= amount
+      newBalance = currentBalance.minus(amountDecimal)
     }
 
     // Create transaction and update wallet balance in a transaction
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest) {
       prisma.transaction.create({
         data: {
           type,
-          amount,
+          amount: amountDecimal,
           date: new Date(date),
           note: note || null,
           categoryId,

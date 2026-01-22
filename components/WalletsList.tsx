@@ -32,7 +32,7 @@ export default function WalletsList({ wallets }: WalletsListProps) {
     }
   }
 
-  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
+  const totalBalance = wallets.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
 
   return (
     <div className="space-y-4">

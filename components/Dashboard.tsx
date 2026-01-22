@@ -10,7 +10,7 @@ export default async function Dashboard() {
     orderBy: { createdAt: 'desc' },
   })
 
-  const totalBalance = wallets.reduce((sum, wallet) => sum + wallet.balance, 0)
+  const totalBalance = wallets.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
 
   const recentTransactions = await prisma.transaction.findMany({
     take: 5,

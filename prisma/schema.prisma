@@ -6,15 +6,15 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Wallet {
   id          String   @id @default(cuid())
   name        String
   type        String   // e.g., "Payoneer", "MEXC", "Bank", "Cash"
-  balance     Float    @default(0)
+  balance     Decimal  @default(0) @db.Decimal(10, 2)
   currency    String   @default("USD")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -41,7 +41,7 @@ model Category {
 model Transaction {
   id          String   @id @default(cuid())
   type        String   // "expense", "income", "lend", "rent"
-  amount      Float
+  amount      Decimal  @db.Decimal(10, 2)
   date        DateTime
   note        String?
   categoryId  String
@@ -61,7 +61,7 @@ model Transaction {
 model Subscription {
   id            String   @id @default(cuid())
   serviceName   String
-  amount        Float
+  amount        Decimal  @db.Decimal(10, 2)
   period        String   // "monthly", "yearly", "weekly", "daily"
   startDate     DateTime
   nextDueDate   DateTime
