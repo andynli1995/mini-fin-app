@@ -36,8 +36,10 @@
    ```
    postgresql://postgres.[PROJECT-REF]:[YOUR-PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
    ```
+   - **CRITICAL**: The connection string MUST include the query parameters `?pgbouncer=true&connection_limit=1`
    - You can find this in Supabase Dashboard > Settings > Database > Connection Pooling > Connection String
    - Make sure to select "Transaction" mode for the pooler
+   - Copy the ENTIRE connection string including the query parameters
 
 6. **Push Database Schema**
    ```bash
@@ -53,11 +55,14 @@ Use the connection pooler URL for production deployments like Vercel:
 postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 ```
 
+**IMPORTANT**: The query parameters `?pgbouncer=true&connection_limit=1` are REQUIRED for the pooler to work correctly.
+
 **How to get this:**
 1. Go to Supabase Dashboard > Settings > Database
 2. Scroll to "Connection Pooling"
 3. Select "Transaction" mode
 4. Copy the connection string (it will use port 6543)
+5. Make sure the copied string includes `?pgbouncer=true&connection_limit=1` at the end
 
 ### For Local Development (Direct Connection)
 For local development and migrations, you can use the direct connection:
@@ -79,11 +84,20 @@ postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres
 ### Connection Errors on Vercel
 
 #### "Can't reach database server" Error
-If you see this error, you're likely using the direct connection (port 5432) instead of the pooler:
+If you see this error, check the following:
 
-1. **Use Connection Pooler URL**: Make sure you're using the pooler URL (port 6543)
+1. **Missing Query Parameters**: The connection string MUST include `?pgbouncer=true&connection_limit=1`
+   - ❌ Wrong: `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres`
+   - ✅ Correct: `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
+
+2. **Use Connection Pooler URL**: Make sure you're using the pooler URL (port 6543), not the direct connection (port 5432)
    - Pooler URL format: `postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
    - Direct URL format: `postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres`
+
+3. **Check Connection Pooling is Enabled**:
+   - Go to Supabase Dashboard > Settings > Database > Connection Pooling
+   - Make sure "Transaction" mode is enabled
+   - If it's not enabled, enable it and wait a few minutes for it to activate
 
 #### "Authentication failed" Error
 If you see "Authentication failed" or "provided database credentials are not valid":
