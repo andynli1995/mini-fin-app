@@ -12,6 +12,10 @@ interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
   amount: number
   category: Category
   wallet: Omit<Wallet, 'balance'> & { balance: number }
+  cleared: boolean
+  isReturn: boolean
+  relatedTransactionId: string | null
+  relatedTransaction?: TransactionWithRelations | null
 }
 
 interface TransactionFormProps {
@@ -19,9 +23,10 @@ interface TransactionFormProps {
   wallets: WalletWithNumber[]
   transaction?: TransactionWithRelations
   onClose?: () => void
+  relatedTransactionId?: string | null // Pre-select a related transaction (for creating returns)
 }
 
-export default function TransactionForm({ categories, wallets, transaction, onClose }: TransactionFormProps) {
+export default function TransactionForm({ categories, wallets, transaction, onClose, relatedTransactionId }: TransactionFormProps) {
   const [isOpen, setIsOpen] = useState(!!transaction)
   const [formData, setFormData] = useState({
     type: 'expense',
@@ -30,8 +35,12 @@ export default function TransactionForm({ categories, wallets, transaction, onCl
     note: '',
     categoryId: '',
     walletId: '',
+    cleared: false,
+    isReturn: false,
+    relatedTransactionId: relatedTransactionId || '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [availableLendRentTransactions, setAvailableLendRentTransactions] = useState<any[]>([])
 
   useEffect(() => {
     if (transaction) {
@@ -42,12 +51,98 @@ export default function TransactionForm({ categories, wallets, transaction, onCl
         note: transaction.note || '',
         categoryId: transaction.categoryId,
         walletId: transaction.walletId,
+        cleared: transaction.cleared || false,
+        isReturn: transaction.isReturn || false,
+        relatedTransactionId: transaction.relatedTransactionId || '',
       })
       setIsOpen(true)
+    } else if (relatedTransactionId) {
+      setFormData(prev => ({
+        ...prev,
+        isReturn: true,
+        type: 'income',
+        relatedTransactionId: relatedTransactionId,
+      }))
+      setIsOpen(true)
     }
-  }, [transaction])
+  }, [transaction, relatedTransactionId])
+
+  useEffect(() => {
+    if (transaction) {
+      setFormData({
+        type: transaction.type,
+        amount: transaction.amount.toString(),
+        date: new Date(transaction.date).toISOString().split('T')[0],
+        note: transaction.note || '',
+        categoryId: transaction.categoryId,
+        walletId: transaction.walletId,
+        cleared: transaction.cleared || false,
+        isReturn: transaction.isReturn || false,
+        relatedTransactionId: transaction.relatedTransactionId || '',
+      })
+      setIsOpen(true)
+    } else if (relatedTransactionId) {
+      // Fetch the related transaction to pre-fill form data
+      fetch(`/api/transactions/${relatedTransactionId}`)
+        .then(res => res.json())
+        .then((relatedTx: any) => {
+          if (relatedTx) {
+            setFormData(prev => ({
+              ...prev,
+              isReturn: true,
+              type: 'income',
+              relatedTransactionId: relatedTransactionId,
+              walletId: relatedTx.walletId || prev.walletId,
+              amount: relatedTx.amount ? Number(relatedTx.amount).toString() : prev.amount,
+            }))
+          } else {
+            setFormData(prev => ({
+              ...prev,
+              isReturn: true,
+              type: 'income',
+              relatedTransactionId: relatedTransactionId,
+            }))
+          }
+          setIsOpen(true)
+        })
+        .catch(err => {
+          console.error('Error fetching related transaction:', err)
+          setFormData(prev => ({
+            ...prev,
+            isReturn: true,
+            type: 'income',
+            relatedTransactionId: relatedTransactionId,
+          }))
+          setIsOpen(true)
+        })
+    }
+  }, [transaction, relatedTransactionId])
+
+  // Fetch available lend/rent transactions when isReturn is true
+  useEffect(() => {
+    if (formData.isReturn && !transaction) {
+      Promise.all([
+        fetch('/api/transactions?type=lend').then(res => res.json()),
+        fetch('/api/transactions?type=rent').then(res => res.json())
+      ])
+        .then(([lendData, rentData]) => {
+          // Filter out already cleared transactions
+          const all = [...lendData, ...rentData]
+          const available = all.filter((t: any) => !t.cleared && (t.type === 'lend' || t.type === 'rent'))
+          setAvailableLendRentTransactions(available)
+        })
+        .catch(err => console.error('Error fetching transactions:', err))
+    }
+  }, [formData.isReturn, transaction])
 
   const filteredCategories = categories.filter((cat) => cat.type === formData.type)
+
+  // When isReturn is true, type must be income
+  useEffect(() => {
+    if (formData.isReturn && formData.type !== 'income') {
+      setFormData(prev => ({ ...prev, type: 'income', categoryId: '' }))
+    }
+  }, [formData.isReturn, formData.type])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -68,6 +163,9 @@ export default function TransactionForm({ categories, wallets, transaction, onCl
           ...formData,
           amount: parseFloat(formData.amount),
           date: new Date(formData.date).toISOString(),
+          cleared: formData.cleared,
+          isReturn: formData.isReturn,
+          relatedTransactionId: formData.isReturn && formData.relatedTransactionId ? formData.relatedTransactionId : null,
         }),
       })
 
@@ -122,7 +220,8 @@ export default function TransactionForm({ categories, wallets, transaction, onCl
               onChange={(e) => {
                 setFormData({ ...formData, type: e.target.value, categoryId: '' })
               }}
-              className="mt-1 block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+              disabled={formData.isReturn}
+              className="mt-1 block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
               required
             >
               <option value="expense">Expense</option>
@@ -131,6 +230,73 @@ export default function TransactionForm({ categories, wallets, transaction, onCl
               <option value="rent">Rent</option>
             </select>
           </div>
+
+          {!transaction && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isReturn"
+                checked={formData.isReturn}
+                onChange={(e) => setFormData({ ...formData, isReturn: e.target.checked, type: e.target.checked ? 'income' : formData.type, relatedTransactionId: e.target.checked ? formData.relatedTransactionId : '' })}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:bg-slate-700 dark:border-slate-600"
+              />
+              <label htmlFor="isReturn" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                This is a return transaction (getting back a loan or rent refund)
+              </label>
+            </div>
+          )}
+
+          {formData.isReturn && !transaction && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Related Transaction (Lend/Rent)</label>
+              <select
+                value={formData.relatedTransactionId}
+                onChange={(e) => {
+                  const selected = availableLendRentTransactions.find(t => t.id === e.target.value)
+                  if (selected) {
+                    setFormData({
+                      ...formData,
+                      relatedTransactionId: e.target.value,
+                      walletId: selected.walletId || formData.walletId,
+                      amount: selected.amount ? Number(selected.amount).toString() : formData.amount,
+                    })
+                  } else {
+                    setFormData({
+                      ...formData,
+                      relatedTransactionId: e.target.value,
+                    })
+                  }
+                }}
+                className="mt-1 block w-full px-4 py-3 text-base rounded-md border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400"
+                required={formData.isReturn}
+              >
+                <option value="">Select original transaction</option>
+                {availableLendRentTransactions.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.type} - ${Number(t.amount).toFixed(2)} - {new Date(t.date).toLocaleDateString()} - {t.category?.name || 'N/A'}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                Select the original lend or rent transaction this return is for. Amount and wallet will be pre-filled.
+              </p>
+            </div>
+          )}
+
+          {transaction && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="cleared"
+                checked={formData.cleared}
+                onChange={(e) => setFormData({ ...formData, cleared: e.target.checked })}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded dark:bg-slate-700 dark:border-slate-600"
+              />
+              <label htmlFor="cleared" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                Mark as cleared/returned
+              </label>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>

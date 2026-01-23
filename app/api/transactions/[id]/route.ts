@@ -2,13 +2,46 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: params.id },
+      include: {
+        category: true,
+        wallet: true,
+        relatedTransaction: {
+          include: {
+            category: true,
+            wallet: true,
+          },
+        },
+      },
+    })
+
+    if (!transaction) {
+      return NextResponse.json({ error: 'Transaction not found' }, { status: 404 })
+    }
+
+    return NextResponse.json(transaction)
+  } catch (error) {
+    console.error('Error fetching transaction:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch transaction' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
     const body = await request.json()
-    const { type, amount, date, note, categoryId, walletId } = body
+    const { type, amount, date, note, categoryId, walletId, cleared, isReturn, relatedTransactionId } = body
 
     if (!type || !amount || !date || !categoryId || !walletId) {
       return NextResponse.json(
@@ -52,6 +85,9 @@ export async function PUT(
           note: note || null,
           categoryId,
           walletId,
+          cleared: cleared !== undefined ? cleared : existingTransaction.cleared,
+          isReturn: isReturn !== undefined ? isReturn : existingTransaction.isReturn,
+          relatedTransactionId: relatedTransactionId !== undefined ? relatedTransactionId : existingTransaction.relatedTransactionId,
         },
       })
 
@@ -93,6 +129,12 @@ export async function PUT(
         include: {
           category: true,
           wallet: true,
+          relatedTransaction: {
+            include: {
+              category: true,
+              wallet: true,
+            },
+          },
         },
       })
     })

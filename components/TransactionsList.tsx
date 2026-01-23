@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Transaction, Category, Wallet } from '@prisma/client'
 import { format } from 'date-fns'
-import { ArrowUpRight, ArrowDownLeft, Trash2, Edit } from 'lucide-react'
+import { ArrowUpRight, ArrowDownLeft, Trash2, Edit, CheckCircle2, RotateCcw } from 'lucide-react'
 import TransactionForm from './TransactionForm'
 
 interface WalletWithNumber extends Omit<Wallet, 'balance'> {
@@ -14,6 +14,10 @@ interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
   amount: number
   category: Category
   wallet: Omit<Wallet, 'balance'> & { balance: number }
+  cleared: boolean
+  isReturn: boolean
+  relatedTransactionId: string | null
+  relatedTransaction?: TransactionWithRelations | null
 }
 
 interface TransactionsListProps {
@@ -24,6 +28,25 @@ interface TransactionsListProps {
 
 export default function TransactionsList({ transactions, categories = [], wallets = [] }: TransactionsListProps) {
   const [editingTransaction, setEditingTransaction] = useState<TransactionWithRelations | null>(null)
+  const [creatingReturn, setCreatingReturn] = useState<string | null>(null)
+
+  const handleMarkCleared = async (id: string, cleared: boolean) => {
+    try {
+      const response = await fetch(`/api/transactions/${id}/clear`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cleared }),
+      })
+
+      if (response.ok) {
+        window.location.reload()
+      } else {
+        alert('Failed to update cleared status')
+      }
+    } catch (error) {
+      alert('Failed to update cleared status')
+    }
+  }
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'income':
@@ -59,7 +82,9 @@ export default function TransactionsList({ transactions, categories = [], wallet
 
   // Mobile card view
   const MobileCard = ({ transaction }: { transaction: TransactionWithRelations }) => (
-    <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 mb-4 border border-gray-200 dark:border-slate-700">
+    <div className={`bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 mb-4 border ${
+      transaction.cleared ? 'border-green-300 dark:border-green-700' : 'border-gray-200 dark:border-slate-700'
+    }`}>
       <div className="flex justify-between items-start mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -75,6 +100,17 @@ export default function TransactionsList({ transactions, categories = [], wallet
               )}
               {transaction.type}
             </span>
+            {transaction.cleared && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30">
+                <CheckCircle2 className="w-3 h-3 mr-1" />
+                Cleared
+              </span>
+            )}
+            {transaction.isReturn && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30">
+                Return
+              </span>
+            )}
           </div>
           <p className="font-medium text-gray-900 dark:text-gray-100">{transaction.category.name}</p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -82,6 +118,11 @@ export default function TransactionsList({ transactions, categories = [], wallet
           </p>
           {transaction.note && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{transaction.note}</p>
+          )}
+          {transaction.relatedTransaction && (
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              Return for: {transaction.relatedTransaction.category.name} (${Number(transaction.relatedTransaction.amount).toFixed(2)})
+            </p>
           )}
         </div>
         <div className="text-right ml-4">
@@ -96,7 +137,34 @@ export default function TransactionsList({ transactions, categories = [], wallet
               maximumFractionDigits: 2,
             })}
           </p>
-          <div className="flex space-x-2 mt-2">
+          <div className="flex flex-wrap gap-2 mt-2 justify-end">
+            {(transaction.type === 'lend' || transaction.type === 'rent') && !transaction.cleared && categories.length > 0 && wallets.length > 0 && (
+              <button
+                onClick={() => setCreatingReturn(transaction.id)}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                title="Create return transaction"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+            )}
+            {!transaction.cleared && (
+              <button
+                onClick={() => handleMarkCleared(transaction.id, true)}
+                className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors"
+                title="Mark as cleared"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            )}
+            {transaction.cleared && (
+              <button
+                onClick={() => handleMarkCleared(transaction.id, false)}
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+                title="Mark as not cleared"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+              </button>
+            )}
             {categories.length > 0 && wallets.length > 0 && (
               <button
                 onClick={() => setEditingTransaction(transaction)}
@@ -144,6 +212,9 @@ export default function TransactionsList({ transactions, categories = [], wallet
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Note
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                Status
+              </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                 Actions
               </th>
@@ -152,13 +223,18 @@ export default function TransactionsList({ transactions, categories = [], wallet
           <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
             {transactions.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                <td colSpan={8} className="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                   No transactions yet. Add your first transaction to get started.
                 </td>
               </tr>
             ) : (
               transactions.map((transaction) => (
-                <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                <tr 
+                  key={transaction.id} 
+                  className={`hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${
+                    transaction.cleared ? 'bg-green-50/50 dark:bg-green-900/10' : ''
+                  }`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                     {format(new Date(transaction.date), 'MMM d, yyyy')}
                   </td>
@@ -196,8 +272,55 @@ export default function TransactionsList({ transactions, categories = [], wallet
                   <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
                     {transaction.note || '-'}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex flex-wrap gap-1">
+                      {transaction.cleared && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Cleared
+                        </span>
+                      )}
+                      {transaction.isReturn && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30">
+                          Return
+                        </span>
+                      )}
+                      {transaction.relatedTransaction && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium text-purple-700 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30" title={`Return for: ${transaction.relatedTransaction.category.name}`}>
+                          Linked
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
+                      {(transaction.type === 'lend' || transaction.type === 'rent') && !transaction.cleared && categories.length > 0 && wallets.length > 0 && (
+                        <button
+                          onClick={() => setCreatingReturn(transaction.id)}
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 transition-colors"
+                          title="Create return transaction"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                        </button>
+                      )}
+                      {!transaction.cleared && (
+                        <button
+                          onClick={() => handleMarkCleared(transaction.id, true)}
+                          className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 transition-colors"
+                          title="Mark as cleared"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {transaction.cleared && (
+                        <button
+                          onClick={() => handleMarkCleared(transaction.id, false)}
+                          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 transition-colors"
+                          title="Mark as not cleared"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                        </button>
+                      )}
                       {categories.length > 0 && wallets.length > 0 && (
                         <button
                           onClick={() => setEditingTransaction(transaction)}
@@ -241,6 +364,14 @@ export default function TransactionsList({ transactions, categories = [], wallet
           wallets={wallets}
           transaction={editingTransaction}
           onClose={() => setEditingTransaction(null)}
+        />
+      )}
+      {creatingReturn && categories.length > 0 && wallets.length > 0 && (
+        <TransactionForm
+          categories={categories}
+          wallets={wallets}
+          relatedTransactionId={creatingReturn}
+          onClose={() => setCreatingReturn(null)}
         />
       )}
     </div>

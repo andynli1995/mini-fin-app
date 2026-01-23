@@ -21,6 +21,10 @@ interface TransactionWithRelations extends Omit<Transaction, 'amount'> {
   amount: number
   category: Category
   wallet: Omit<Wallet, 'balance'> & { balance: number }
+  cleared: boolean
+  isReturn: boolean
+  relatedTransactionId: string | null
+  relatedTransaction?: TransactionWithRelations | null
 }
 
 interface WalletWithNumber extends Omit<Wallet, 'balance'> {

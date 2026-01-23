@@ -3,6 +3,7 @@ import "./globals.css";
 import PinLock from "@/components/PinLock";
 import InstallPrompt from "@/components/InstallPrompt";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import UpdateNotification from "@/components/UpdateNotification";
 import NotificationService from "@/components/NotificationService";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -53,6 +54,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <ServiceWorkerRegistration />
+          <UpdateNotification />
           <NotificationService />
           <PinLock>
             {children}

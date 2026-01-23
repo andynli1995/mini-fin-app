@@ -39,22 +39,30 @@ model Category {
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  type        String   // "expense", "income", "lend", "rent"
-  amount      Decimal  @db.Decimal(10, 2)
-  date        DateTime
-  note        String?
-  categoryId  String
-  walletId    String
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String       @id @default(cuid())
+  type                String       // "expense", "income", "lend", "rent"
+  amount              Decimal      @db.Decimal(10, 2)
+  date                DateTime
+  note                String?
+  categoryId          String
+  walletId            String
+  cleared             Boolean      @default(false) // Whether the transaction is cleared/returned
+  isReturn            Boolean      @default(false) // Whether this is a return transaction (e.g., getting back a loan)
+  relatedTransactionId String?    // ID of the original transaction this return is linked to (for lend/rent returns)
+  relatedTransaction  Transaction? @relation("TransactionReturns", fields: [relatedTransactionId], references: [id], onDelete: SetNull)
+  returnTransactions  Transaction[] @relation("TransactionReturns")
+  category            Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  wallet              Wallet       @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
   
   @@index([type])
   @@index([date])
   @@index([categoryId])
   @@index([walletId])
+  @@index([cleared])
+  @@index([isReturn])
+  @@index([relatedTransactionId])
   @@map("transactions")
 }
 

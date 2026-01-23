@@ -1,6 +1,6 @@
 // Service Worker for Finance Manager PWA
-const CACHE_NAME = 'finance-manager-v3'
-const STATIC_CACHE_NAME = 'finance-manager-static-v3'
+const CACHE_NAME = 'finance-manager-v4'
+const STATIC_CACHE_NAME = 'finance-manager-static-v4'
 
 // Static assets to cache on install
 const staticAssets = [
@@ -19,6 +19,13 @@ self.addEventListener('install', (event) => {
   )
   // Force activation of new service worker
   self.skipWaiting()
+})
+
+// Listen for skip waiting message from client
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 // Fetch event - smart caching strategy

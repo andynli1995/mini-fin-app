@@ -37,6 +37,12 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
       include: {
         category: true,
         wallet: true,
+        relatedTransaction: {
+          include: {
+            category: true,
+            wallet: true,
+          },
+        },
       },
       orderBy: { date: 'desc' },
     })
@@ -50,6 +56,9 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
       note: string | null
       walletId: string
       categoryId: string
+      cleared: boolean
+      isReturn: boolean
+      relatedTransactionId: string | null
       createdAt: Date
       updatedAt: Date
       category: {
@@ -70,6 +79,38 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
         createdAt: Date
         updatedAt: Date
       }
+      relatedTransaction: {
+        id: string
+        type: string
+        amount: number
+        date: Date
+        note: string | null
+        walletId: string
+        categoryId: string
+        cleared: boolean
+        isReturn: boolean
+        relatedTransactionId: string | null
+        createdAt: Date
+        updatedAt: Date
+        category: {
+          id: string
+          name: string
+          type: string
+          color: string | null
+          icon: string | null
+          createdAt: Date
+          updatedAt: Date
+        }
+        wallet: {
+          id: string
+          name: string
+          type: string
+          balance: number
+          currency: string
+          createdAt: Date
+          updatedAt: Date
+        }
+      } | null
     }
 
     const transactionsWithNumbers: TransactionWithNumbers[] = transactions.map((transaction) => ({
@@ -79,6 +120,27 @@ export default async function WalletDetailPage({ params }: WalletDetailPageProps
         ...transaction.wallet,
         balance: Number(transaction.wallet.balance),
       },
+      relatedTransaction: transaction.relatedTransaction
+        ? {
+            id: transaction.relatedTransaction.id,
+            type: transaction.relatedTransaction.type,
+            amount: Number(transaction.relatedTransaction.amount),
+            date: transaction.relatedTransaction.date,
+            note: transaction.relatedTransaction.note,
+            walletId: transaction.relatedTransaction.walletId,
+            categoryId: transaction.relatedTransaction.categoryId,
+            cleared: transaction.relatedTransaction.cleared,
+            isReturn: transaction.relatedTransaction.isReturn,
+            relatedTransactionId: transaction.relatedTransaction.relatedTransactionId,
+            createdAt: transaction.relatedTransaction.createdAt,
+            updatedAt: transaction.relatedTransaction.updatedAt,
+            category: transaction.relatedTransaction.category,
+            wallet: {
+              ...transaction.relatedTransaction.wallet,
+              balance: Number(transaction.relatedTransaction.wallet.balance),
+            },
+          }
+        : null,
     }))
 
     const formattedBalance = Number(wallet.balance).toLocaleString('en-US', {

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
-import { updateWalletBalance } from '@/lib/balance-utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { type, amount, date, note, categoryId, walletId } = body
+    const { type, amount, date, note, categoryId, walletId, isReturn, relatedTransactionId, cleared } = body
 
     // Validate required fields
     if (!type || !amount || !date || !categoryId || !walletId) {
@@ -25,6 +24,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Wallet not found' }, { status: 404 })
     }
 
+    // If this is a return transaction, verify the related transaction exists and is a lend/rent
+    if (isReturn && relatedTransactionId) {
+      const relatedTransaction = await prisma.transaction.findUnique({
+        where: { id: relatedTransactionId },
+      })
+      
+      if (!relatedTransaction) {
+        return NextResponse.json(
+          { error: 'Related transaction not found' },
+          { status: 404 }
+        )
+      }
+      
+      if (relatedTransaction.type !== 'lend' && relatedTransaction.type !== 'rent') {
+        return NextResponse.json(
+          { error: 'Return transactions can only be linked to lend or rent transactions' },
+          { status: 400 }
+        )
+      }
+      
+      // Return transactions should be income type
+      if (type !== 'income') {
+        return NextResponse.json(
+          { error: 'Return transactions must be of type income' },
+          { status: 400 }
+        )
+      }
+    }
+
     const amountDecimal = new Prisma.Decimal(amount)
 
     // Create transaction and recalculate wallet balance
@@ -39,8 +67,19 @@ export async function POST(request: NextRequest) {
           note: note || null,
           categoryId,
           walletId,
+          isReturn: isReturn || false,
+          relatedTransactionId: relatedTransactionId || null,
+          cleared: cleared || false,
         },
       })
+
+      // If this is a return transaction, mark the related transaction as cleared
+      if (isReturn && relatedTransactionId) {
+        await tx.transaction.update({
+          where: { id: relatedTransactionId },
+          data: { cleared: true },
+        })
+      }
 
       // Recalculate balance from ALL transactions: sum(income) - sum(expense) - sum(lend) - sum(rent)
       const transactions = await tx.transaction.findMany({
@@ -100,6 +139,12 @@ export async function GET(request: NextRequest) {
       include: {
         category: true,
         wallet: true,
+        relatedTransaction: {
+          include: {
+            category: true,
+            wallet: true,
+          },
+        },
       },
       orderBy: { date: 'desc' },
     })
