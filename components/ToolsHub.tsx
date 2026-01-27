@@ -55,16 +55,73 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
           <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-2/3" />
         </div>
       ) : criticalInfo ? (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-            {criticalInfo.label}
-          </div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {criticalInfo.value}
-          </div>
-          {criticalInfo.subtitle && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {criticalInfo.subtitle}
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-3">
+          {/* Primary Info */}
+          {criticalInfo.primary && (
+            <div>
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                {criticalInfo.primary.label}
+              </div>
+              <div className={`text-2xl font-bold ${
+                criticalInfo.primary.urgent 
+                  ? 'text-red-600 dark:text-red-400' 
+                  : 'text-gray-900 dark:text-gray-100'
+              }`}>
+                {criticalInfo.primary.value}
+              </div>
+              {criticalInfo.primary.subtitle && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {criticalInfo.primary.subtitle}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Secondary Info */}
+          {criticalInfo.secondary && (
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                {criticalInfo.secondary.label}
+              </div>
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {criticalInfo.secondary.value}
+              </div>
+              {criticalInfo.secondary.subtitle && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {criticalInfo.secondary.subtitle}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Alerts */}
+          {criticalInfo.alerts && criticalInfo.alerts.length > 0 && (
+            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+              {criticalInfo.alerts.map((alert, index) => (
+                <div
+                  key={index}
+                  className={`flex items-center justify-between p-2 rounded-md ${
+                    alert.urgent
+                      ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                      : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                  }`}
+                >
+                  <span className={`text-xs font-medium ${
+                    alert.urgent
+                      ? 'text-red-700 dark:text-red-300'
+                      : 'text-yellow-700 dark:text-yellow-300'
+                  }`}>
+                    {alert.label}
+                  </span>
+                  <span className={`text-sm font-bold ${
+                    alert.urgent
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-yellow-600 dark:text-yellow-400'
+                  }`}>
+                    {alert.count}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </div>
