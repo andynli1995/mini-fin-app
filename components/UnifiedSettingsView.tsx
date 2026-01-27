@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Lock, Save, Download, Sun, Moon, Monitor, Bell, BellOff, Settings2, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, Lock, Save, Download, Sun, Moon, Monitor, Bell, BellOff, Settings2, ChevronRight, Wallet } from 'lucide-react'
 import { useInstallPWA } from './useInstallPWA'
 import { useTheme } from './ThemeProvider'
 import { tools } from '@/lib/tools-registry'
