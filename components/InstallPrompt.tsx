@@ -53,7 +53,7 @@ export default function InstallPrompt() {
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              Install Finance Manager
+              Install Toolkit
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">
               {hasPrompt

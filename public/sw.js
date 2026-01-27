@@ -1,6 +1,6 @@
-// Service Worker for Finance Manager PWA
-const CACHE_NAME = 'finance-manager-v4'
-const STATIC_CACHE_NAME = 'finance-manager-static-v4'
+// Service Worker for Solo Entrepreneur Toolkit PWA
+const CACHE_NAME = 'entrepreneur-toolkit-v4'
+const STATIC_CACHE_NAME = 'entrepreneur-toolkit-static-v4'
 
 // Static assets to cache on install
 const staticAssets = [
