@@ -170,23 +170,36 @@ async function checkSubscriptions() {
     if (response.ok) {
       const data = await response.json()
       if (data.subscriptions && data.subscriptions.length > 0) {
-        data.subscriptions.forEach((sub) => {
-          self.registration.showNotification(sub.title, {
-            body: sub.body,
-            icon: '/icon-192.png',
-            badge: '/icon-192.png',
-            tag: `subscription-${sub.id}`,
-            requireInteraction: false,
-            data: {
-              url: '/subscriptions',
-              subscriptionId: sub.id,
-            },
-          })
-        })
+        for (const sub of data.subscriptions) {
+          try {
+            await self.registration.showNotification(sub.title, {
+              body: sub.body,
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+              tag: `subscription-${sub.id}`,
+              requireInteraction: false,
+              data: {
+                url: '/subscriptions',
+                subscriptionId: sub.id,
+              },
+            })
+          } catch (notifError) {
+            // Handle notification errors gracefully (e.g., permission denied)
+            // Don't log to console to avoid cluttering the console
+            // If permission is denied, stop trying for other notifications
+            if (notifError.message && notifError.message.includes('permission')) {
+              // Permission not granted, stop trying
+              return
+            }
+          }
+        }
       }
     }
   } catch (error) {
-    console.error('Error checking subscriptions:', error)
+    // Only log non-permission errors
+    if (!error.message || !error.message.includes('permission')) {
+      console.error('Error checking subscriptions:', error)
+    }
   }
 }
 
