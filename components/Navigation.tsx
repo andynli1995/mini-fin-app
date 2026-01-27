@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Lock, Sun, Moon, Monitor } from 'lucide-react'
+import { Menu, Lock, Sun, Moon, Monitor, Settings2 } from 'lucide-react'
 import { usePinLock } from './PinLock'
 import { useTheme } from './ThemeProvider'
 import Logo from './Logo'
@@ -43,6 +43,15 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
         </div>
 
         <div className="flex items-center space-x-2">
+          {/* Settings button */}
+          <Link
+            href="/settings"
+            className="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 transition-colors"
+            title="Settings"
+          >
+            <Settings2 className="w-5 h-5" />
+          </Link>
+
           {/* Theme toggle buttons */}
           <div className="flex items-center space-x-1 bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
             <button

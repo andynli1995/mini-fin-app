@@ -11,7 +11,6 @@ const financeNavItems = [
   { href: '/tools/finance/wallets', label: 'Wallets', icon: Wallet },
   { href: '/tools/finance/reports', label: 'Reports', icon: BarChart3 },
   { href: '/tools/finance/categories', label: 'Categories', icon: Settings },
-  { href: '/tools/finance/settings', label: 'Settings', icon: Settings2 },
 ]
 
 // Legacy nav items for backward compatibility (redirect to finance routes)

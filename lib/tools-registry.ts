@@ -9,6 +9,7 @@ export interface Tool {
   href: string
   color: string
   getCriticalInfo?: () => Promise<ToolCriticalInfo | null>
+  getSettingsComponent?: () => React.ComponentType<any> | null
 }
 
 export interface ToolCriticalInfo {
