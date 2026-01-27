@@ -4,7 +4,7 @@ An all-in-one platform for solo entrepreneurs to manage their business, finances
 
 ## Overview
 
-Solo Entrepreneur Toolkit is a modular platform that provides multiple integrated tools in one application. Currently includes a comprehensive Finance Manager, with more tools coming soon (Interview Manager, etc.).
+Solo Entrepreneur Toolkit is a modular platform that provides multiple integrated tools in one application. Currently includes a comprehensive Finance Manager and Interview Manager, with more tools coming soon.
 
 ## Features
 
@@ -31,8 +31,33 @@ A complete financial management system with:
 - **Subscription Reminders**: Visual alerts for upcoming (next 7 days) and overdue subscriptions
 - **Unified Settings**: Global settings accessible from header, with tool-specific settings organized by tool
 
+### Interview Manager Tool
+
+A complete job application and interview tracking system with:
+
+- **Company Management**: Store company information including name, website, industry, size, and location
+- **Interview Tracking**: 
+  - Track interviews with company, role, status, scheduled date/time
+  - Support for different interview types (phone, video, onsite, technical, behavioral)
+  - Store interviewer name and reference links
+  - Interview status workflow (applied, screening, interview, offer, rejected, withdrawn)
+- **Assessment Management**: 
+  - Track company assessments with deadlines
+  - Monitor assessment status (pending, in-progress, completed, submitted, expired)
+  - Store assessment descriptions and reference links
+- **Reminders**: 
+  - Set custom reminders for interviews (days and hours before)
+  - Set custom reminders for assessments (days before deadline)
+  - Visual alerts for upcoming and overdue items
+- **Dashboard**: 
+  - Professional activity graphs showing interview and assessment trends
+  - Monthly activity charts (bar charts)
+  - Status distribution charts (pie charts)
+  - Statistics cards with key metrics
+  - Upcoming interviews and assessments display
+- **Critical Info Display**: Shows total applications, upcoming interviews/assessments, and reminders on the Tools Hub
+
 ### Coming Soon
-- Interview Manager: Track job applications, interviews, and follow-ups
 - More tools to be added...
 
 ## Tech Stack
@@ -132,16 +157,28 @@ solo-toolkit/
 │   │   ├── transactions/   # Transaction endpoints
 │   │   ├── wallets/        # Wallet endpoints
 │   │   ├── subscriptions/  # Subscription endpoints
-│   │   └── categories/     # Category endpoints
+│   │   ├── categories/     # Category endpoints
+│   │   ├── companies/      # Company endpoints
+│   │   ├── interviews/     # Interview endpoints
+│   │   ├── assessments/    # Assessment endpoints
+│   │   ├── tools/          # Tool-specific API routes
+│   │   │   ├── finance/    # Finance critical info
+│   │   │   └── interviews/ # Interview critical info
+│   │   └── settings/       # Settings endpoints
 │   ├── tools/              # Tools directory
-│   │   └── finance/        # Finance Manager tool
-│   │       ├── page.tsx    # Finance dashboard
-│   │       ├── transactions/
-│   │       ├── wallets/
-│   │       ├── subscriptions/
-│   │       ├── reports/
-│   │       ├── categories/
-│   │       └── settings/
+│   │   ├── finance/        # Finance Manager tool
+│   │   │   ├── page.tsx    # Finance dashboard
+│   │   │   ├── transactions/
+│   │   │   ├── wallets/
+│   │   │   ├── subscriptions/
+│   │   │   ├── reports/
+│   │   │   ├── categories/
+│   │   │   └── settings/
+│   │   └── interviews/     # Interview Manager tool
+│   │       ├── page.tsx    # Interview dashboard
+│   │       ├── interviews/
+│   │       ├── assessments/
+│   │       └── companies/
 │   ├── page.tsx            # Tools hub (home page)
 │   └── layout.tsx          # Root layout
 ├── components/             # React components
@@ -152,6 +189,17 @@ solo-toolkit/
 │   ├── TransactionForm.tsx # Transaction form
 │   ├── WalletCard.tsx      # Wallet display card
 │   ├── RemindersBanner.tsx # Subscription reminders
+│   ├── interviews/         # Interview Manager components
+│   │   ├── InterviewDashboard.tsx
+│   │   ├── InterviewForm.tsx
+│   │   ├── InterviewsList.tsx
+│   │   ├── AssessmentForm.tsx
+│   │   ├── AssessmentsList.tsx
+│   │   ├── CompanyForm.tsx
+│   │   ├── CompaniesList.tsx
+│   │   ├── InterviewActivityChart.tsx
+│   │   ├── AssessmentActivityChart.tsx
+│   │   └── ...
 │   └── ...
 ├── lib/                    # Utility functions
 │   ├── prisma.ts           # Prisma client
@@ -210,6 +258,42 @@ When you first open the app, you'll see the Tools Hub showing all available tool
 3. View summary cards, charts, and detailed transaction lists
 4. **Note**: Reports show the most recent 1000 transactions for optimal performance
 
+### Interview Manager
+
+#### Managing Companies
+
+1. Navigate to Interview Manager → Companies
+2. Click "Add Company"
+3. Enter company name, industry, size, location, website, and optional notes
+4. Companies can be linked to multiple interviews and assessments
+
+#### Tracking Interviews
+
+1. Navigate to Interview Manager → Interviews
+2. Click "Add Interview"
+3. Select company, enter role, status, and scheduled date/time
+4. Optionally set interview type, interviewer name, and reference link
+5. **Set Reminders**: Configure days and hours before interview to receive reminders
+6. Track status through the workflow: applied → screening → interview → offer/rejected
+
+#### Managing Assessments
+
+1. Navigate to Interview Manager → Assessments
+2. Click "Add Assessment"
+3. Select company, enter title, description, and deadline
+4. **Set Reminders**: Configure days before deadline to receive reminders
+5. Update status as you progress (pending → in-progress → completed/submitted)
+6. Mark as submitted when completed
+
+#### Viewing Dashboard
+
+1. Navigate to Interview Manager → Dashboard
+2. View statistics cards with key metrics
+3. Analyze activity trends with monthly bar charts
+4. Review status distribution with pie charts
+5. See upcoming interviews and assessments with visual alerts
+6. Track overdue assessments
+
 ### Settings
 
 Access unified settings from the settings icon in the header (top right):
@@ -222,6 +306,7 @@ Access unified settings from the settings icon in the header (top right):
 
 - **Tool-Specific Settings**:
   - Finance Manager: Hide balances, reminder days
+  - Interview Manager: Reminder preferences (configured per interview/assessment)
   - More tool settings as they're added
 
 ## Adding New Tools
@@ -276,11 +361,17 @@ The app is optimized for fast navigation and data loading:
 
 ## Database Schema
 
+### Finance Manager
 - **Wallet**: Stores virtual wallet information and balances
 - **Category**: Transaction categories organized by type
 - **Transaction**: Individual financial transactions linked to categories and wallets
 - **Subscription**: Recurring subscription information with due dates
 - **AppSettings**: Stores app settings like PIN hash and lock state
+
+### Interview Manager
+- **Company**: Company information (name, website, industry, size, location, notes)
+- **Interview**: Interview records with company, role, status, scheduled date/time, reminders, and notes
+- **Assessment**: Assessment records with company, title, deadline, status, reminders, and notes
 
 ## Data Safety
 
@@ -496,6 +587,14 @@ The app includes automatic update detection:
 - Mobile app
 - Bank account integration
 - Advanced analytics and insights
+
+### Interview Manager
+- Email integration for interview scheduling
+- Calendar sync (Google Calendar, Outlook)
+- Interview feedback and notes templates
+- Salary negotiation tracking
+- Offer comparison tools
+- Application status automation
 
 ## License
 
