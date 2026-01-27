@@ -1,6 +1,6 @@
 // Service Worker for Solo Entrepreneur Toolkit PWA
-const CACHE_NAME = 'entrepreneur-toolkit-v4'
-const STATIC_CACHE_NAME = 'entrepreneur-toolkit-static-v4'
+const CACHE_NAME = 'entrepreneur-toolkit-v5'
+const STATIC_CACHE_NAME = 'entrepreneur-toolkit-static-v5'
 
 // Static assets to cache on install
 const staticAssets = [

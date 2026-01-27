@@ -103,15 +103,15 @@ export const tools: Tool[] = [
       }
     },
   },
-  {
-    id: 'interviews',
-    name: 'Interview Manager',
-    description: 'Track job applications, interviews, and follow-ups',
-    icon: Briefcase,
-    href: '/tools/interviews',
-    color: 'purple',
-    // getCriticalInfo will be implemented when the interviews app is built
-  },
+  // Interview Manager - coming soon
+  // {
+  //   id: 'interviews',
+  //   name: 'Interview Manager',
+  //   description: 'Track job applications, interviews, and follow-ups',
+  //   icon: Briefcase,
+  //   href: '/tools/interviews',
+  //   color: 'purple',
+  // },
   // Add more tools here as they're developed
 ]
 
