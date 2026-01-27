@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { tools, type ToolCriticalInfo } from '@/lib/tools-registry'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles, AlertCircle, Bell } from 'lucide-react'
 
 interface ToolCardProps {
   tool: typeof tools[0]
@@ -30,13 +30,41 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
   const colorClass = colorClasses[tool.color as keyof typeof colorClasses] || colorClasses.blue
   const iconColorClass = iconColorClasses[tool.color as keyof typeof iconColorClasses] || iconColorClasses.blue
 
+  // Check if there are urgent alerts
+  const hasUrgentAlerts = criticalInfo?.alerts?.some(alert => alert.urgent) || false
+  const hasAlerts = (criticalInfo?.alerts?.length || 0) > 0
+  const urgentCount = criticalInfo?.alerts?.filter(alert => alert.urgent).reduce((sum, alert) => sum + alert.count, 0) || 0
+  const totalAlertCount = criticalInfo?.alerts?.reduce((sum, alert) => sum + alert.count, 0) || 0
+
   return (
     <Link
       href={tool.href}
-      className={`group relative block p-6 rounded-xl border-2 transition-all duration-200 ${colorClass} transform hover:scale-[1.02] hover:shadow-lg`}
+      className={`group relative block p-6 rounded-xl border-2 transition-all duration-200 ${colorClass} transform hover:scale-[1.02] hover:shadow-lg ${
+        hasUrgentAlerts 
+          ? 'ring-2 ring-red-500 dark:ring-red-400 ring-offset-2 dark:ring-offset-slate-900 border-red-300 dark:border-red-700' 
+          : hasAlerts 
+          ? 'ring-1 ring-yellow-400 dark:ring-yellow-500 border-yellow-300 dark:border-yellow-700'
+          : ''
+      }`}
     >
+      {/* Urgent Alert Badge */}
+      {hasUrgentAlerts && (
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-red-500 dark:bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold animate-pulse">
+          <AlertCircle className="w-3 h-3" />
+          <span>{urgentCount}</span>
+        </div>
+      )}
+      
+      {/* Alert Badge (non-urgent) */}
+      {hasAlerts && !hasUrgentAlerts && (
+        <div className="absolute top-3 right-3 flex items-center gap-1 bg-yellow-500 dark:bg-yellow-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
+          <Bell className="w-3 h-3" />
+          <span>{totalAlertCount}</span>
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-4">
-        <div className={`p-3 rounded-lg bg-white dark:bg-slate-800 ${iconColorClass}`}>
+        <div className={`p-3 rounded-lg bg-white dark:bg-slate-800 ${iconColorClass} relative`}>
           <Icon className="w-8 h-8" />
         </div>
         <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -94,29 +122,44 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
             </div>
           )}
           
-          {/* Alerts */}
+          {/* Alerts - More prominent display */}
           {criticalInfo.alerts && criticalInfo.alerts.length > 0 && (
-            <div className="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+            <div className="pt-3 border-t-2 border-gray-300 dark:border-gray-600 space-y-2">
               {criticalInfo.alerts.map((alert, index) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-between p-2 rounded-md ${
+                  className={`flex items-center justify-between p-2.5 rounded-lg ${
                     alert.urgent
-                      ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
-                      : 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800'
+                      ? 'bg-red-100 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700 shadow-sm'
+                      : 'bg-yellow-100 dark:bg-yellow-900/30 border-2 border-yellow-300 dark:border-yellow-700 shadow-sm'
                   }`}
                 >
-                  <span className={`text-xs font-medium ${
+                  <div className="flex items-center gap-2">
+                    {alert.urgent ? (
+                      <AlertCircle className={`w-4 h-4 ${
+                        alert.urgent
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-yellow-600 dark:text-yellow-400'
+                      }`} />
+                    ) : (
+                      <Bell className={`w-4 h-4 ${
+                        alert.urgent
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-yellow-600 dark:text-yellow-400'
+                      }`} />
+                    )}
+                    <span className={`text-xs font-semibold ${
+                      alert.urgent
+                        ? 'text-red-800 dark:text-red-200'
+                        : 'text-yellow-800 dark:text-yellow-200'
+                    }`}>
+                      {alert.label}
+                    </span>
+                  </div>
+                  <span className={`text-sm font-bold px-2 py-0.5 rounded-full ${
                     alert.urgent
-                      ? 'text-red-700 dark:text-red-300'
-                      : 'text-yellow-700 dark:text-yellow-300'
-                  }`}>
-                    {alert.label}
-                  </span>
-                  <span className={`text-sm font-bold ${
-                    alert.urgent
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-yellow-600 dark:text-yellow-400'
+                      ? 'bg-red-200 dark:bg-red-800 text-red-900 dark:text-red-100'
+                      : 'bg-yellow-200 dark:bg-yellow-800 text-yellow-900 dark:text-yellow-100'
                   }`}>
                     {alert.count}
                   </span>
