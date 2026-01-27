@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
+import { toLocalDatetimeLocalString } from '@/lib/datetime-local'
 
 interface Company {
   id: string
@@ -43,7 +44,7 @@ export default function InterviewForm({ interview, companies, profiles, onClose 
     role: interview?.role || '',
     status: interview?.status || 'applied',
     scheduledAt: interview?.scheduledAt
-      ? new Date(interview.scheduledAt).toISOString().slice(0, 16)
+      ? toLocalDatetimeLocalString(new Date(interview.scheduledAt))
       : '',
     referenceLink: interview?.referenceLink || '',
     notes: interview?.notes || '',
@@ -71,7 +72,7 @@ export default function InterviewForm({ interview, companies, profiles, onClose 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          scheduledAt: formData.scheduledAt || null,
+          scheduledAt: formData.scheduledAt ? new Date(formData.scheduledAt).toISOString() : null,
           reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : 1,
           reminderHours: formData.reminderHours ? parseInt(formData.reminderHours) : null,
           profileId: formData.profileId || null,

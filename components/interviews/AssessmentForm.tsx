@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { toLocalDatetimeLocalString } from '@/lib/datetime-local'
 
 interface Company {
   id: string
@@ -42,13 +43,13 @@ export default function AssessmentForm({ assessment, companies, profiles, onClos
     title: assessment?.title || '',
     description: assessment?.description || '',
     deadline: assessment?.deadline
-      ? new Date(assessment.deadline).toISOString().slice(0, 16)
+      ? toLocalDatetimeLocalString(new Date(assessment.deadline))
       : '',
     status: assessment?.status || 'pending',
     referenceLink: assessment?.referenceLink || '',
     notes: assessment?.notes || '',
     submittedAt: assessment?.submittedAt
-      ? new Date(assessment.submittedAt).toISOString().slice(0, 16)
+      ? toLocalDatetimeLocalString(new Date(assessment.submittedAt))
       : '',
     reminderDays: assessment?.reminderDays?.toString() ?? '1',
   })
@@ -71,8 +72,8 @@ export default function AssessmentForm({ assessment, companies, profiles, onClos
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          deadline: formData.deadline,
-          submittedAt: formData.submittedAt || null,
+          deadline: formData.deadline ? new Date(formData.deadline).toISOString() : undefined,
+          submittedAt: formData.submittedAt ? new Date(formData.submittedAt).toISOString() : null,
           reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : 1,
           profileId: formData.profileId || null,
         }),
