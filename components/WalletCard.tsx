@@ -15,18 +15,31 @@ interface WalletCardProps {
 }
 
 export default function WalletCard({ wallet, defaultHidden = false }: WalletCardProps) {
-  const [isHidden, setIsHidden] = useState(defaultHidden)
+  const [isHidden, setIsHidden] = useState(() => {
+    // Initialize from localStorage if available, otherwise use defaultHidden
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('hideBalances')
+      if (stored !== null) {
+        return stored === 'true'
+      }
+    }
+    return defaultHidden
+  })
 
   useEffect(() => {
-    // Always respect the defaultHidden prop from settings
-    // This ensures the dashboard reflects the current "hide balances by default" setting
-    setIsHidden(defaultHidden)
-    // Also update localStorage to match the setting
-    localStorage.setItem('hideBalances', defaultHidden ? 'true' : 'false')
+    // When defaultHidden changes (e.g., setting is updated), update to match
+    // This ensures the dashboard respects the "hide balances by default" setting
+    if (defaultHidden !== undefined) {
+      setIsHidden(defaultHidden)
+      localStorage.setItem('hideBalances', defaultHidden ? 'true' : 'false')
+    }
   }, [defaultHidden])
 
   const toggleVisibility = () => {
-    setIsHidden(!isHidden)
+    const newHidden = !isHidden
+    setIsHidden(newHidden)
+    // Save user's manual toggle preference
+    localStorage.setItem('hideBalances', newHidden ? 'true' : 'false')
   }
 
   const formattedBalance = Number(wallet.balance).toLocaleString('en-US', {
