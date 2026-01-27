@@ -21,13 +21,11 @@ export default function BalanceDisplay({
   const [isHidden, setIsHidden] = useState(defaultHidden)
 
   useEffect(() => {
-    // Check localStorage for user preference
-    const stored = localStorage.getItem('hideBalances')
-    if (stored !== null) {
-      setIsHidden(stored === 'true')
-    } else {
-      setIsHidden(defaultHidden)
-    }
+    // Always respect the defaultHidden prop from settings
+    // This ensures the dashboard reflects the current "hide balances by default" setting
+    setIsHidden(defaultHidden)
+    // Also update localStorage to match the setting
+    localStorage.setItem('hideBalances', defaultHidden ? 'true' : 'false')
   }, [defaultHidden])
 
   const toggleVisibility = () => {
