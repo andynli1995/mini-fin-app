@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X, ArrowLeft, Grid3x3 } from 'lucide-react'
+import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X, ArrowLeft, Grid3x3, Briefcase, FileText } from 'lucide-react'
 
 const financeNavItems = [
   { href: '/tools/finance', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +11,13 @@ const financeNavItems = [
   { href: '/tools/finance/wallets', label: 'Wallets', icon: Wallet },
   { href: '/tools/finance/reports', label: 'Reports', icon: BarChart3 },
   { href: '/tools/finance/categories', label: 'Categories', icon: Settings },
+]
+
+const interviewNavItems = [
+  { href: '/tools/interviews', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/tools/interviews/interviews', label: 'Interviews', icon: Calendar },
+  { href: '/tools/interviews/assessments', label: 'Assessments', icon: FileText },
+  { href: '/tools/interviews/companies', label: 'Companies', icon: Briefcase },
 ]
 
 // Legacy nav items for backward compatibility (redirect to finance routes)
@@ -32,7 +39,14 @@ interface SidebarProps {
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
   const isFinanceRoute = pathname?.startsWith('/tools/finance') || pathname === '/transactions' || pathname === '/wallets' || pathname === '/subscriptions' || pathname === '/reports' || pathname === '/categories' || pathname === '/settings'
-  const navItems = isFinanceRoute ? financeNavItems : []
+  const isInterviewRoute = pathname?.startsWith('/tools/interviews')
+  
+  let navItems: typeof financeNavItems = []
+  if (isFinanceRoute) {
+    navItems = financeNavItems
+  } else if (isInterviewRoute) {
+    navItems = interviewNavItems
+  }
 
   // Only close sidebar on mobile when clicking a link
   const handleLinkClick = () => {

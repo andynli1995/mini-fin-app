@@ -99,3 +99,60 @@ model AppSettings {
   
   @@map("app_settings")
 }
+
+model Company {
+  id          String      @id @default(cuid())
+  name        String
+  website     String?     // Company website URL
+  logo        String?     // Logo URL or path
+  industry    String?     // Industry sector
+  size        String?     // Company size (e.g., "Startup", "50-200", "500+")
+  location    String?     // Company location
+  notes       String?     // Additional notes about the company
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  interviews  Interview[]
+  assessments Assessment[]
+  
+  @@map("companies")
+}
+
+model Interview {
+  id            String    @id @default(cuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  role          String    // Job role/title
+  status        String    // "applied", "screening", "interview", "offer", "rejected", "withdrawn"
+  scheduledAt   DateTime? // Interview scheduled date/time
+  referenceLink String?   // Link to job posting or application
+  notes         String?   // Interview notes
+  interviewer   String?   // Interviewer name
+  interviewType String?   // "phone", "video", "onsite", "technical", "behavioral"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([companyId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("interviews")
+}
+
+model Assessment {
+  id            String    @id @default(cuid())
+  companyId     String
+  company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title         String    // Assessment title/name
+  description   String?   // Assessment description
+  deadline      DateTime  // Assessment deadline
+  status        String    // "pending", "in-progress", "completed", "submitted", "expired"
+  referenceLink String?   // Link to assessment platform or instructions
+  notes         String?   // Assessment notes
+  submittedAt   DateTime? // When assessment was submitted
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([companyId])
+  @@index([status])
+  @@index([deadline])
+  @@map("assessments")
+}

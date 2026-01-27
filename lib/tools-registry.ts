@@ -115,15 +115,110 @@ export const tools: Tool[] = [
       }
     },
   },
-  // Interview Manager - coming soon
-  // {
-  //   id: 'interviews',
-  //   name: 'Interview Manager',
-  //   description: 'Track job applications, interviews, and follow-ups',
-  //   icon: Briefcase,
-  //   href: '/tools/interviews',
-  //   color: 'purple',
-  // },
+  {
+    id: 'interviews',
+    name: 'Interview Manager',
+    description: 'Track job applications, interviews, and assessments',
+    icon: Briefcase,
+    href: '/tools/interviews',
+    color: 'purple',
+    getCriticalInfo: async () => {
+      try {
+        const { prisma } = await import('@/lib/prisma')
+        const { differenceInDays } = await import('date-fns')
+        
+        const now = new Date()
+        const sevenDaysFromNow = new Date(now)
+        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
+        
+        // Parallelize queries
+        const [
+          upcomingInterviews,
+          upcomingAssessments,
+          overdueAssessments,
+          totalInterviews,
+          totalAssessments,
+        ] = await Promise.all([
+          prisma.interview.findMany({
+            where: {
+              scheduledAt: {
+                gte: now,
+                lte: sevenDaysFromNow,
+              },
+              status: {
+                notIn: ['rejected', 'withdrawn', 'offer'],
+              },
+            },
+            select: { id: true },
+          }),
+          prisma.assessment.findMany({
+            where: {
+              deadline: {
+                gte: now,
+                lte: sevenDaysFromNow,
+              },
+              status: {
+                notIn: ['completed', 'submitted', 'expired'],
+              },
+            },
+            select: { id: true },
+          }),
+          prisma.assessment.findMany({
+            where: {
+              deadline: {
+                lt: now,
+              },
+              status: {
+                notIn: ['completed', 'submitted'],
+              },
+            },
+            select: { id: true },
+          }),
+          prisma.interview.count(),
+          prisma.assessment.count(),
+        ])
+        
+        // Build alerts array
+        const alerts: Array<{ label: string; count: number; urgent?: boolean }> = []
+        
+        if (overdueAssessments.length > 0) {
+          alerts.push({
+            label: 'Overdue Assessments',
+            count: overdueAssessments.length,
+            urgent: true,
+          })
+        }
+        
+        if (upcomingInterviews.length > 0) {
+          alerts.push({
+            label: 'Upcoming Interviews (7 days)',
+            count: upcomingInterviews.length,
+            urgent: false,
+          })
+        }
+        
+        if (upcomingAssessments.length > 0) {
+          alerts.push({
+            label: 'Upcoming Assessments (7 days)',
+            count: upcomingAssessments.length,
+            urgent: false,
+          })
+        }
+        
+        return {
+          primary: {
+            label: 'Total Applications',
+            value: totalInterviews + totalAssessments,
+            subtitle: `${totalInterviews} interviews, ${totalAssessments} assessments`,
+          },
+          alerts: alerts.length > 0 ? alerts : undefined,
+        }
+      } catch (error) {
+        console.error('Error fetching interview info:', error)
+        return null
+      }
+    },
+  },
   // Add more tools here as they're developed
 ]
 
