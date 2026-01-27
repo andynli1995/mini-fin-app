@@ -47,6 +47,8 @@ export async function POST(request: NextRequest) {
       notes,
       interviewer,
       interviewType,
+      reminderDays,
+      reminderHours,
     } = body
 
     if (!companyId || !role) {
@@ -66,6 +68,8 @@ export async function POST(request: NextRequest) {
         notes,
         interviewer,
         interviewType,
+        reminderDays: reminderDays !== undefined ? reminderDays : null,
+        reminderHours: reminderHours !== undefined ? reminderHours : null,
       },
       include: {
         company: true,

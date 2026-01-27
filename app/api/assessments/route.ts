@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       status,
       referenceLink,
       notes,
+      reminderDays,
     } = body
 
     if (!companyId || !title || !deadline) {
@@ -64,6 +65,7 @@ export async function POST(request: NextRequest) {
         status: status || 'pending',
         referenceLink,
         notes,
+        reminderDays: reminderDays !== undefined ? reminderDays : null,
       },
       include: {
         company: true,

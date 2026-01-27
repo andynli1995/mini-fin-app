@@ -47,6 +47,8 @@ export async function PUT(
       notes,
       interviewer,
       interviewType,
+      reminderDays,
+      reminderHours,
     } = body
 
     const interview = await prisma.interview.update({
@@ -60,6 +62,8 @@ export async function PUT(
         notes,
         interviewer,
         interviewType,
+        reminderDays: reminderDays !== undefined ? reminderDays : null,
+        reminderHours: reminderHours !== undefined ? reminderHours : null,
       },
       include: {
         company: true,

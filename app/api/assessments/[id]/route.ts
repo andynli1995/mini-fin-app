@@ -47,6 +47,7 @@ export async function PUT(
       referenceLink,
       notes,
       submittedAt,
+      reminderDays,
     } = body
 
     const assessment = await prisma.assessment.update({
@@ -60,6 +61,7 @@ export async function PUT(
         referenceLink,
         notes,
         submittedAt: submittedAt ? new Date(submittedAt) : undefined,
+        reminderDays: reminderDays !== undefined ? reminderDays : null,
       },
       include: {
         company: true,

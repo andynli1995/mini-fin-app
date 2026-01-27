@@ -18,6 +18,8 @@ interface Interview {
   notes: string | null
   interviewer: string | null
   interviewType: string | null
+  reminderDays: number | null
+  reminderHours: number | null
 }
 
 interface InterviewFormProps {
@@ -38,6 +40,8 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
     notes: interview?.notes || '',
     interviewer: interview?.interviewer || '',
     interviewType: interview?.interviewType || '',
+    reminderDays: interview?.reminderDays?.toString() || '',
+    reminderHours: interview?.reminderHours?.toString() || '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -59,6 +63,8 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
         body: JSON.stringify({
           ...formData,
           scheduledAt: formData.scheduledAt || null,
+          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : null,
+          reminderHours: formData.reminderHours ? parseInt(formData.reminderHours) : null,
         }),
       })
 
@@ -190,6 +196,43 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
                 className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
                 placeholder="Interviewer name"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Reminder (Days Before)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.reminderDays}
+                onChange={(e) => setFormData({ ...formData, reminderDays: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="e.g., 1"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Days before interview to remind
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Reminder (Hours Before)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="23"
+                value={formData.reminderHours}
+                onChange={(e) => setFormData({ ...formData, reminderHours: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                placeholder="e.g., 2"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Hours before interview to remind
+              </p>
             </div>
           </div>
 

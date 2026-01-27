@@ -128,6 +128,8 @@ model Interview {
   notes         String?   // Interview notes
   interviewer   String?   // Interviewer name
   interviewType String?   // "phone", "video", "onsite", "technical", "behavioral"
+  reminderDays  Int?      // Days before interview to send reminder
+  reminderHours Int?      // Hours before interview to send reminder
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
@@ -148,6 +150,7 @@ model Assessment {
   referenceLink String?   // Link to assessment platform or instructions
   notes         String?   // Assessment notes
   submittedAt   DateTime? // When assessment was submitted
+  reminderDays Int?      // Days before deadline to send reminder
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   

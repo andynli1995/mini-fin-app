@@ -125,7 +125,6 @@ export const tools: Tool[] = [
     getCriticalInfo: async () => {
       try {
         const { prisma } = await import('@/lib/prisma')
-        const { differenceInDays } = await import('date-fns')
         
         const now = new Date()
         const sevenDaysFromNow = new Date(now)
@@ -133,8 +132,8 @@ export const tools: Tool[] = [
         
         // Parallelize queries
         const [
-          upcomingInterviews,
-          upcomingAssessments,
+          allInterviews,
+          allAssessments,
           overdueAssessments,
           totalInterviews,
           totalAssessments,
@@ -143,25 +142,32 @@ export const tools: Tool[] = [
             where: {
               scheduledAt: {
                 gte: now,
-                lte: sevenDaysFromNow,
               },
               status: {
                 notIn: ['rejected', 'withdrawn', 'offer'],
               },
             },
-            select: { id: true },
+            select: { 
+              id: true,
+              scheduledAt: true,
+              reminderDays: true,
+              reminderHours: true,
+            },
           }),
           prisma.assessment.findMany({
             where: {
               deadline: {
                 gte: now,
-                lte: sevenDaysFromNow,
               },
               status: {
                 notIn: ['completed', 'submitted', 'expired'],
               },
             },
-            select: { id: true },
+            select: { 
+              id: true,
+              deadline: true,
+              reminderDays: true,
+            },
           }),
           prisma.assessment.findMany({
             where: {
@@ -178,6 +184,61 @@ export const tools: Tool[] = [
           prisma.assessment.count(),
         ])
         
+        // Check for interview reminders
+        const interviewReminders: string[] = []
+        allInterviews.forEach((interview) => {
+          if (!interview.scheduledAt) return
+          
+          const scheduledAt = new Date(interview.scheduledAt)
+          let reminderTime = new Date(scheduledAt)
+          
+          // Subtract reminder days
+          if (interview.reminderDays) {
+            reminderTime.setDate(reminderTime.getDate() - interview.reminderDays)
+          }
+          
+          // Subtract reminder hours
+          if (interview.reminderHours) {
+            reminderTime.setHours(reminderTime.getHours() - interview.reminderHours)
+          }
+          
+          // Check if reminder time is within the next 7 days
+          if (reminderTime >= now && reminderTime <= sevenDaysFromNow) {
+            interviewReminders.push(interview.id)
+          }
+        })
+        
+        // Check for assessment reminders
+        const assessmentReminders: string[] = []
+        allAssessments.forEach((assessment) => {
+          const deadline = new Date(assessment.deadline)
+          let reminderTime = new Date(deadline)
+          
+          // Subtract reminder days
+          if (assessment.reminderDays) {
+            reminderTime.setDate(reminderTime.getDate() - assessment.reminderDays)
+          } else {
+            return // No reminder set
+          }
+          
+          // Check if reminder time is within the next 7 days
+          if (reminderTime >= now && reminderTime <= sevenDaysFromNow) {
+            assessmentReminders.push(assessment.id)
+          }
+        })
+        
+        // Also check for upcoming items (within 7 days)
+        const upcomingInterviews = allInterviews.filter((interview) => {
+          if (!interview.scheduledAt) return false
+          const scheduledAt = new Date(interview.scheduledAt)
+          return scheduledAt >= now && scheduledAt <= sevenDaysFromNow
+        })
+        
+        const upcomingAssessments = allAssessments.filter((assessment) => {
+          const deadline = new Date(assessment.deadline)
+          return deadline >= now && deadline <= sevenDaysFromNow
+        })
+        
         // Build alerts array
         const alerts: Array<{ label: string; count: number; urgent?: boolean }> = []
         
@@ -189,7 +250,23 @@ export const tools: Tool[] = [
           })
         }
         
-        if (upcomingInterviews.length > 0) {
+        if (interviewReminders.length > 0) {
+          alerts.push({
+            label: 'Interview Reminders',
+            count: interviewReminders.length,
+            urgent: false,
+          })
+        }
+        
+        if (assessmentReminders.length > 0) {
+          alerts.push({
+            label: 'Assessment Reminders',
+            count: assessmentReminders.length,
+            urgent: false,
+          })
+        }
+        
+        if (upcomingInterviews.length > 0 && interviewReminders.length === 0) {
           alerts.push({
             label: 'Upcoming Interviews (7 days)',
             count: upcomingInterviews.length,
@@ -197,7 +274,7 @@ export const tools: Tool[] = [
           })
         }
         
-        if (upcomingAssessments.length > 0) {
+        if (upcomingAssessments.length > 0 && assessmentReminders.length === 0) {
           alerts.push({
             label: 'Upcoming Assessments (7 days)',
             count: upcomingAssessments.length,

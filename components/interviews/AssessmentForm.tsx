@@ -18,6 +18,7 @@ interface Assessment {
   referenceLink: string | null
   notes: string | null
   submittedAt: Date | null
+  reminderDays: number | null
 }
 
 interface AssessmentFormProps {
@@ -40,6 +41,7 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
     submittedAt: assessment?.submittedAt
       ? new Date(assessment.submittedAt).toISOString().slice(0, 16)
       : '',
+    reminderDays: assessment?.reminderDays?.toString() || '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -62,6 +64,7 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
           ...formData,
           deadline: formData.deadline,
           submittedAt: formData.submittedAt || null,
+          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : null,
         }),
       })
 
@@ -174,6 +177,23 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
                 <option value="expired">Expired</option>
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Reminder (Days Before Deadline)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={formData.reminderDays}
+              onChange={(e) => setFormData({ ...formData, reminderDays: e.target.value })}
+              className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+              placeholder="e.g., 3"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Days before deadline to send reminder
+            </p>
           </div>
 
           {formData.status === 'submitted' && (
