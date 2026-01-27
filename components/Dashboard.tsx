@@ -8,9 +8,53 @@ import QuickActions from './QuickActions'
 
 export default async function Dashboard() {
   try {
-    const wallets = await prisma.wallet.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    // Parallelize database queries for better performance
+    const [wallets, recentTransactions, upcomingSubscriptions, allActiveSubscriptions, settings, categories] = await Promise.all([
+      prisma.wallet.findMany({
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.transaction.findMany({
+        take: 5,
+        orderBy: { date: 'desc' },
+        include: {
+          category: true,
+          wallet: true,
+          relatedTransaction: {
+            include: {
+              category: true,
+              wallet: true,
+            },
+          },
+        },
+      }),
+      prisma.subscription.findMany({
+        where: {
+          isActive: true,
+          nextDueDate: {
+            gte: new Date(),
+          },
+        },
+        include: {
+          wallet: true,
+        },
+        orderBy: {
+          nextDueDate: 'asc',
+        },
+        take: 5,
+      }),
+      prisma.subscription.findMany({
+        where: {
+          isActive: true,
+        },
+        include: {
+          wallet: true,
+        },
+      }),
+      prisma.appSettings.findFirst(),
+      prisma.category.findMany({
+        orderBy: { name: 'asc' },
+      }),
+    ])
 
     // Convert Decimal to number for Client Components
     type WalletWithNumber = {
@@ -36,21 +80,6 @@ export default async function Dashboard() {
     // Check if all wallets use the same currency
     const currencies = new Set(walletsWithNumbers.map(w => w.currency))
     const hasMultipleCurrencies = currencies.size > 1
-
-    const recentTransactions = await prisma.transaction.findMany({
-      take: 5,
-      orderBy: { date: 'desc' },
-      include: {
-        category: true,
-        wallet: true,
-        relatedTransaction: {
-          include: {
-            category: true,
-            wallet: true,
-          },
-        },
-      },
-    })
 
     // Convert Decimal to number for Client Components
     // Transactions always have a wallet (walletId is required in schema)
@@ -149,30 +178,7 @@ export default async function Dashboard() {
         : null,
     }))
 
-    const upcomingSubscriptions = await prisma.subscription.findMany({
-      where: {
-        isActive: true,
-        nextDueDate: {
-          gte: new Date(),
-        },
-      },
-      include: {
-        wallet: true,
-      },
-      orderBy: {
-        nextDueDate: 'asc',
-      },
-      take: 5,
-    })
-
-    const allActiveSubscriptions = await prisma.subscription.findMany({
-      where: {
-        isActive: true,
-      },
-      include: {
-        wallet: true,
-      },
-    })
+    // upcomingSubscriptions and allActiveSubscriptions already fetched in parallel above
 
     // Convert Decimal to number for Client Components
     type SubscriptionWithNumbers = {
@@ -217,13 +223,7 @@ export default async function Dashboard() {
       } : null,
     }))
 
-    // Get settings for default balance visibility
-    const settings = await prisma.appSettings.findFirst()
-
-    // Get categories for QuickActions
-    const categories = await prisma.category.findMany({
-      orderBy: { name: 'asc' },
-    })
+    // settings and categories already fetched in parallel above
 
     return (
       <div className="space-y-6">

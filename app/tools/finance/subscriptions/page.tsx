@@ -18,24 +18,23 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
   const currentPage = parseInt(searchParams.page || '1', 10)
   const skip = (currentPage - 1) * ITEMS_PER_PAGE
 
-  // Get total count for pagination
-  const totalCount = await prisma.subscription.count()
-
-  // Get paginated subscriptions
-  const subscriptions = await prisma.subscription.findMany({
-    skip,
-    take: ITEMS_PER_PAGE,
-    orderBy: { nextDueDate: 'asc' },
-    include: {
-      wallet: true,
-    },
-  })
+  // Parallelize queries for better performance
+  const [totalCount, subscriptions, wallets] = await Promise.all([
+    prisma.subscription.count(),
+    prisma.subscription.findMany({
+      skip,
+      take: ITEMS_PER_PAGE,
+      orderBy: { nextDueDate: 'asc' },
+      include: {
+        wallet: true,
+      },
+    }),
+    prisma.wallet.findMany({
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
-
-  const wallets = await prisma.wallet.findMany({
-    orderBy: { name: 'asc' },
-  })
 
   // Convert Decimal to number for Client Components
   type WalletWithNumber = {

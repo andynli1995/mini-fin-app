@@ -182,27 +182,38 @@ export default function ToolsHub() {
       const newToolsData = new Map<string, ToolCriticalInfo | null>()
       const newLoading = new Map<string, boolean>()
 
-      for (const tool of tools) {
+      // Set all tools to loading
+      tools.forEach(tool => {
         if (tool.getCriticalInfo) {
           newLoading.set(tool.id, true)
-          setLoading(new Map(newLoading))
+        }
+      })
+      setLoading(new Map(newLoading))
 
+      // Load all tools in parallel for better performance
+      const toolPromises = tools.map(async (tool) => {
+        if (tool.getCriticalInfo) {
           try {
             const info = await tool.getCriticalInfo()
-            newToolsData.set(tool.id, info)
+            return { toolId: tool.id, info }
           } catch (error) {
             console.error(`Error loading info for ${tool.id}:`, error)
-            newToolsData.set(tool.id, null)
-          } finally {
-            newLoading.set(tool.id, false)
-            setLoading(new Map(newLoading))
+            return { toolId: tool.id, info: null }
           }
-        } else {
-          newToolsData.set(tool.id, null)
         }
-      }
+        return { toolId: tool.id, info: null }
+      })
+
+      const results = await Promise.all(toolPromises)
+      
+      // Update data
+      results.forEach(({ toolId, info }) => {
+        newToolsData.set(toolId, info)
+        newLoading.set(toolId, false)
+      })
 
       setToolsData(newToolsData)
+      setLoading(new Map(newLoading))
     }
 
     loadCriticalInfo()

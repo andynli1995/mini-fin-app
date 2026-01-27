@@ -43,30 +43,41 @@ export const tools: Tool[] = [
     getCriticalInfo: async () => {
       try {
         const { prisma } = await import('@/lib/prisma')
-        const { differenceInDays } = await import('date-fns')
         
-        // Get wallets and calculate total balance
-        const wallets = await prisma.wallet.findMany()
+        // Parallelize queries for better performance
+        const now = new Date()
+        const sevenDaysFromNow = new Date(now)
+        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
+        
+        const [wallets, overdueSubscriptions, upcomingSubscriptions] = await Promise.all([
+          prisma.wallet.findMany(),
+          // Overdue subscriptions (nextDueDate < now)
+          prisma.subscription.findMany({
+            where: {
+              isActive: true,
+              nextDueDate: {
+                lt: now,
+              },
+            },
+            select: { id: true }, // Only need count, not full data
+          }),
+          // Upcoming subscriptions (nextDueDate between now and 7 days)
+          prisma.subscription.findMany({
+            where: {
+              isActive: true,
+              nextDueDate: {
+                gte: now,
+                lte: sevenDaysFromNow,
+              },
+            },
+            select: { id: true }, // Only need count, not full data
+          }),
+        ])
+        
+        // Calculate total balance
         const totalBalance = wallets.reduce((sum, wallet) => sum + Number(wallet.balance), 0)
         const currency = wallets[0]?.currency || 'USD'
         const hasMultipleCurrencies = new Set(wallets.map(w => w.currency)).size > 1
-        
-        // Get subscriptions for alerts
-        const now = new Date()
-        const subscriptions = await prisma.subscription.findMany({
-          where: { isActive: true },
-        })
-        
-        // Calculate overdue and upcoming subscriptions
-        const overdueSubscriptions = subscriptions.filter((sub) => {
-          const daysUntil = differenceInDays(new Date(sub.nextDueDate), now)
-          return daysUntil < 0
-        })
-        
-        const upcomingSubscriptions = subscriptions.filter((sub) => {
-          const daysUntil = differenceInDays(new Date(sub.nextDueDate), now)
-          return daysUntil >= 0 && daysUntil <= 7
-        })
         
         // Build alerts array
         const alerts: Array<{ label: string; count: number; urgent?: boolean }> = []

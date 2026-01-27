@@ -18,35 +18,33 @@ export default async function TransactionsPage({ searchParams }: TransactionsPag
   const currentPage = parseInt(searchParams.page || '1', 10)
   const skip = (currentPage - 1) * ITEMS_PER_PAGE
 
-  // Get total count for pagination
-  const totalCount = await prisma.transaction.count()
-
-  // Get paginated transactions
-  const transactions = await prisma.transaction.findMany({
-    skip,
-    take: ITEMS_PER_PAGE,
-    orderBy: { date: 'desc' },
-    include: {
-      category: true,
-      wallet: true,
-      relatedTransaction: {
-        include: {
-          category: true,
-          wallet: true,
+  // Parallelize queries for better performance
+  const [totalCount, transactions, categories, wallets] = await Promise.all([
+    prisma.transaction.count(),
+    prisma.transaction.findMany({
+      skip,
+      take: ITEMS_PER_PAGE,
+      orderBy: { date: 'desc' },
+      include: {
+        category: true,
+        wallet: true,
+        relatedTransaction: {
+          include: {
+            category: true,
+            wallet: true,
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' },
+    }),
+    prisma.wallet.findMany({
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE)
-
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-  })
-
-  const wallets = await prisma.wallet.findMany({
-    orderBy: { name: 'asc' },
-  })
 
   // Convert Decimal to number for Client Components
   type WalletWithNumber = {

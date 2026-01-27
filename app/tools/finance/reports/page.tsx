@@ -5,27 +5,30 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 export default async function ReportsPage() {
-  const transactions = await prisma.transaction.findMany({
-    include: {
-      category: true,
-      wallet: true,
-      relatedTransaction: {
-        include: {
-          category: true,
-          wallet: true,
+  // Parallelize queries for better performance
+  // Limit transactions to last 1000 for performance (reports can filter client-side)
+  const [transactions, categories, wallets] = await Promise.all([
+    prisma.transaction.findMany({
+      take: 1000, // Limit to most recent 1000 transactions for performance
+      include: {
+        category: true,
+        wallet: true,
+        relatedTransaction: {
+          include: {
+            category: true,
+            wallet: true,
+          },
         },
       },
-    },
-    orderBy: { date: 'desc' },
-  })
-
-  const categories = await prisma.category.findMany({
-    orderBy: { name: 'asc' },
-  })
-
-  const wallets = await prisma.wallet.findMany({
-    orderBy: { name: 'asc' },
-  })
+      orderBy: { date: 'desc' },
+    }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' },
+    }),
+    prisma.wallet.findMany({
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   // Convert Decimal to number for Client Components
   type TransactionWithNumbers = {
