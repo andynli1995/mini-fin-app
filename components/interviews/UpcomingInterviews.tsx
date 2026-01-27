@@ -13,6 +13,7 @@ interface Interview {
     id: string
     name: string
   }
+  profile?: { id: string; name: string } | null
   referenceLink?: string | null
 }
 
@@ -85,6 +86,11 @@ export default function UpcomingInterviews({
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                         {interview.company.name}
+                        {interview.profile?.name && (
+                          <span className="ml-1.5 text-xs font-normal text-gray-500 dark:text-gray-400">
+                            · {interview.profile.name}
+                          </span>
+                        )}
                       </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                         {interview.role}

@@ -12,6 +12,7 @@ export async function GET(
       where: { id: params.id },
       include: {
         company: true,
+        profile: true,
       },
     })
 
@@ -48,6 +49,7 @@ export async function PUT(
       notes,
       submittedAt,
       reminderDays,
+      profileId,
     } = body
 
     const assessment = await prisma.assessment.update({
@@ -62,9 +64,11 @@ export async function PUT(
         notes,
         submittedAt: submittedAt ? new Date(submittedAt) : undefined,
         reminderDays: reminderDays !== undefined ? reminderDays : null,
+        profileId: profileId !== undefined ? profileId : undefined,
       },
       include: {
         company: true,
+        profile: true,
       },
     })
 

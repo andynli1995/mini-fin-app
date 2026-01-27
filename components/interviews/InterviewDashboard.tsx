@@ -26,12 +26,14 @@ export default async function InterviewDashboard() {
       prisma.interview.findMany({
         include: {
           company: true,
+          profile: true,
         },
         orderBy: { scheduledAt: 'desc' },
       }),
       prisma.assessment.findMany({
         include: {
           company: true,
+          profile: true,
         },
         orderBy: { deadline: 'asc' },
       }),
@@ -47,6 +49,7 @@ export default async function InterviewDashboard() {
         },
         include: {
           company: true,
+          profile: true,
         },
         orderBy: { scheduledAt: 'asc' },
         take: 5,
@@ -63,6 +66,7 @@ export default async function InterviewDashboard() {
         },
         include: {
           company: true,
+          profile: true,
         },
         orderBy: { deadline: 'asc' },
         take: 5,
@@ -78,6 +82,7 @@ export default async function InterviewDashboard() {
         },
         include: {
           company: true,
+          profile: true,
         },
         orderBy: { deadline: 'asc' },
       }),

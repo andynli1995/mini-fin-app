@@ -12,6 +12,7 @@ export async function GET(
       where: { id: params.id },
       include: {
         company: true,
+        profile: true,
       },
     })
 
@@ -40,6 +41,7 @@ export async function PUT(
     const body = await request.json()
     const {
       companyId,
+      profileId,
       role,
       status,
       scheduledAt,
@@ -55,6 +57,7 @@ export async function PUT(
       where: { id: params.id },
       data: {
         companyId,
+        profileId: profileId !== undefined ? profileId : undefined,
         role,
         status,
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
@@ -67,6 +70,7 @@ export async function PUT(
       },
       include: {
         company: true,
+        profile: true,
       },
     })
 

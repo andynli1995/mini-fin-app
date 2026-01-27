@@ -13,6 +13,7 @@ interface Assessment {
     id: string
     name: string
   }
+  profile?: { id: string; name: string } | null
   referenceLink?: string | null
 }
 
@@ -93,6 +94,11 @@ export default function UpcomingAssessments({
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                       {assessment.company.name}
+                      {assessment.profile?.name && (
+                        <span className="ml-1.5 text-xs font-normal text-gray-500 dark:text-gray-400">
+                          · {assessment.profile.name}
+                        </span>
+                      )}
                     </p>
                     <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                       {assessment.title}

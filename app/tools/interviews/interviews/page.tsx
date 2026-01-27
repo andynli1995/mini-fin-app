@@ -6,14 +6,18 @@ import { prisma } from '@/lib/prisma'
 export const dynamic = 'force-dynamic'
 
 export default async function InterviewsListPage() {
-  const [interviews, companies] = await Promise.all([
+  const [interviews, companies, profiles] = await Promise.all([
     prisma.interview.findMany({
       include: {
         company: true,
+        profile: true,
       },
       orderBy: { scheduledAt: 'desc' },
     }),
     prisma.company.findMany({
+      orderBy: { name: 'asc' },
+    }),
+    prisma.profile.findMany({
       orderBy: { name: 'asc' },
     }),
   ])
@@ -27,16 +31,16 @@ export default async function InterviewsListPage() {
               Interviews
             </h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Manage your interview schedule and track application status
+              Manage interview schedule and track by profile (e.g. Larry, Andy)
             </p>
           </div>
           <div className="flex-shrink-0">
-            <AddInterviewButton companies={companies} />
+            <AddInterviewButton companies={companies} profiles={profiles} />
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg border border-gray-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
           <div className="p-4 sm:p-6">
-            <InterviewsList interviews={interviews} companies={companies} />
+            <InterviewsList interviews={interviews} companies={companies} profiles={profiles} />
           </div>
         </div>
       </div>

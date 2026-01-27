@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Edit, Trash2, ExternalLink, Building2 } from 'lucide-react'
 import CompanyForm from './CompanyForm'
+import ExpandableText from './ExpandableText'
 
 interface Company {
   id: string
@@ -109,9 +110,11 @@ export default function CompaniesList({ companies }: CompaniesListProps) {
               </div>
             )}
             {company.notes && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                {company.notes}
-              </p>
+              <ExpandableText
+                text={company.notes}
+                maxLength={120}
+                className="mt-2"
+              />
             )}
           </div>
         ))}

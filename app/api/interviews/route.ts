@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         company: true,
+        profile: true,
       },
       orderBy: { scheduledAt: 'desc' },
     })
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const {
       companyId,
+      profileId,
       role,
       status,
       scheduledAt,
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
     const interview = await prisma.interview.create({
       data: {
         companyId,
+        profileId: profileId || null,
         role,
         status: status || 'applied',
         scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
@@ -68,11 +71,12 @@ export async function POST(request: NextRequest) {
         notes,
         interviewer,
         interviewType,
-        reminderDays: reminderDays !== undefined ? reminderDays : null,
+        reminderDays: reminderDays !== undefined ? reminderDays : 1,
         reminderHours: reminderHours !== undefined ? reminderHours : null,
       },
       include: {
         company: true,
+        profile: true,
       },
     })
 

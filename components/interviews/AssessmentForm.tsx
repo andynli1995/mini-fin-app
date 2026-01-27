@@ -19,17 +19,26 @@ interface Assessment {
   notes: string | null
   submittedAt: string | Date | null
   reminderDays: number | null
+  profileId?: string | null
+  profile?: { id: string; name: string } | null
+}
+
+interface Profile {
+  id: string
+  name: string
 }
 
 interface AssessmentFormProps {
   assessment?: Assessment | null
   companies: Company[]
+  profiles: Profile[]
   onClose: () => void
 }
 
-export default function AssessmentForm({ assessment, companies, onClose }: AssessmentFormProps) {
+export default function AssessmentForm({ assessment, companies, profiles, onClose }: AssessmentFormProps) {
   const [formData, setFormData] = useState({
     companyId: assessment?.companyId || '',
+    profileId: assessment?.profileId ?? assessment?.profile?.id ?? '',
     title: assessment?.title || '',
     description: assessment?.description || '',
     deadline: assessment?.deadline
@@ -41,7 +50,7 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
     submittedAt: assessment?.submittedAt
       ? new Date(assessment.submittedAt).toISOString().slice(0, 16)
       : '',
-    reminderDays: assessment?.reminderDays?.toString() || '',
+    reminderDays: assessment?.reminderDays?.toString() ?? '1',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -64,7 +73,8 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
           ...formData,
           deadline: formData.deadline,
           submittedAt: formData.submittedAt || null,
-          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : null,
+          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : 1,
+          profileId: formData.profileId || null,
         }),
       })
 
@@ -102,23 +112,45 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Company *
-            </label>
-            <select
-              value={formData.companyId}
-              onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-              className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-              required
-            >
-              <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Company *
+              </label>
+              <select
+                value={formData.companyId}
+                onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                required
+              >
+                <option value="">Select company</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Profile (applicant)
+              </label>
+              <select
+                value={formData.profileId}
+                onChange={(e) => setFormData({ ...formData, profileId: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">None</option>
+                {profiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                e.g. Larry, Andy — which profile this application is for
+              </p>
+            </div>
           </div>
 
           <div>
@@ -189,10 +221,10 @@ export default function AssessmentForm({ assessment, companies, onClose }: Asses
               value={formData.reminderDays}
               onChange={(e) => setFormData({ ...formData, reminderDays: e.target.value })}
               className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-              placeholder="e.g., 3"
+              placeholder="1"
             />
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Days before deadline to send reminder
+              Days before deadline to send reminder (default: 1)
             </p>
           </div>
 

@@ -20,17 +20,26 @@ interface Interview {
   interviewType: string | null
   reminderDays: number | null
   reminderHours: number | null
+  profileId?: string | null
+  profile?: { id: string; name: string } | null
+}
+
+interface Profile {
+  id: string
+  name: string
 }
 
 interface InterviewFormProps {
   interview?: Interview | null
   companies: Company[]
+  profiles: Profile[]
   onClose: () => void
 }
 
-export default function InterviewForm({ interview, companies, onClose }: InterviewFormProps) {
+export default function InterviewForm({ interview, companies, profiles, onClose }: InterviewFormProps) {
   const [formData, setFormData] = useState({
     companyId: interview?.companyId || '',
+    profileId: interview?.profileId ?? interview?.profile?.id ?? '',
     role: interview?.role || '',
     status: interview?.status || 'applied',
     scheduledAt: interview?.scheduledAt
@@ -40,7 +49,7 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
     notes: interview?.notes || '',
     interviewer: interview?.interviewer || '',
     interviewType: interview?.interviewType || '',
-    reminderDays: interview?.reminderDays?.toString() || '',
+    reminderDays: interview?.reminderDays?.toString() ?? '1',
     reminderHours: interview?.reminderHours?.toString() || '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,8 +72,9 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
         body: JSON.stringify({
           ...formData,
           scheduledAt: formData.scheduledAt || null,
-          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : null,
+          reminderDays: formData.reminderDays ? parseInt(formData.reminderDays) : 1,
           reminderHours: formData.reminderHours ? parseInt(formData.reminderHours) : null,
+          profileId: formData.profileId || null,
         }),
       })
 
@@ -102,23 +112,45 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Company *
-            </label>
-            <select
-              value={formData.companyId}
-              onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-              className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
-              required
-            >
-              <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Company *
+              </label>
+              <select
+                value={formData.companyId}
+                onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                required
+              >
+                <option value="">Select company</option>
+                {companies.map((company) => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Profile (applicant)
+              </label>
+              <select
+                value={formData.profileId}
+                onChange={(e) => setFormData({ ...formData, profileId: e.target.value })}
+                className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+              >
+                <option value="">None</option>
+                {profiles.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                e.g. Larry, Andy — which profile this application is for
+              </p>
+            </div>
           </div>
 
           <div>
@@ -213,7 +245,7 @@ export default function InterviewForm({ interview, companies, onClose }: Intervi
                 placeholder="e.g., 1"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Days before interview to remind
+                Days before interview to remind (default: 1)
               </p>
             </div>
 

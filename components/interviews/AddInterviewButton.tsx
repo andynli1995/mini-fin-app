@@ -9,11 +9,17 @@ interface Company {
   name: string
 }
 
-interface AddInterviewButtonProps {
-  companies: Company[]
+interface Profile {
+  id: string
+  name: string
 }
 
-export default function AddInterviewButton({ companies }: AddInterviewButtonProps) {
+interface AddInterviewButtonProps {
+  companies: Company[]
+  profiles: Profile[]
+}
+
+export default function AddInterviewButton({ companies, profiles }: AddInterviewButtonProps) {
   const [showForm, setShowForm] = useState(false)
 
   return (
@@ -26,7 +32,7 @@ export default function AddInterviewButton({ companies }: AddInterviewButtonProp
         Add Interview
       </button>
       {showForm && (
-        <InterviewForm companies={companies} onClose={() => setShowForm(false)} />
+        <InterviewForm companies={companies} profiles={profiles} onClose={() => setShowForm(false)} />
       )}
     </>
   )

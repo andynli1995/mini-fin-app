@@ -100,6 +100,17 @@ model AppSettings {
   @@map("app_settings")
 }
 
+model Profile {
+  id          String       @id @default(cuid())
+  name        String       // e.g., "Larry", "Andy"
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  interviews  Interview[]
+  assessments Assessment[]
+  
+  @@map("profiles")
+}
+
 model Company {
   id          String      @id @default(cuid())
   name        String
@@ -121,6 +132,8 @@ model Interview {
   id            String    @id @default(cuid())
   companyId     String
   company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  profileId     String?   // Which profile/applicant (e.g., Larry, Andy)
+  profile       Profile?  @relation(fields: [profileId], references: [id], onDelete: SetNull)
   role          String    // Job role/title
   status        String    // "applied", "screening", "interview", "offer", "rejected", "withdrawn"
   scheduledAt   DateTime? // Interview scheduled date/time
@@ -134,6 +147,7 @@ model Interview {
   updatedAt     DateTime  @updatedAt
   
   @@index([companyId])
+  @@index([profileId])
   @@index([status])
   @@index([scheduledAt])
   @@map("interviews")
@@ -143,6 +157,8 @@ model Assessment {
   id            String    @id @default(cuid())
   companyId     String
   company       Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  profileId     String?   // Which profile/applicant (e.g., Larry, Andy)
+  profile       Profile?  @relation(fields: [profileId], references: [id], onDelete: SetNull)
   title         String    // Assessment title/name
   description   String?   // Assessment description
   deadline      DateTime  // Assessment deadline
@@ -150,11 +166,12 @@ model Assessment {
   referenceLink String?   // Link to assessment platform or instructions
   notes         String?   // Assessment notes
   submittedAt   DateTime? // When assessment was submitted
-  reminderDays Int?      // Days before deadline to send reminder
+  reminderDays  Int?      // Days before deadline to send reminder
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
   @@index([companyId])
+  @@index([profileId])
   @@index([status])
   @@index([deadline])
   @@map("assessments")

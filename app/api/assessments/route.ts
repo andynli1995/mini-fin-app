@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         company: true,
+        profile: true,
       },
       orderBy: { deadline: 'asc' },
     })
@@ -47,6 +48,7 @@ export async function POST(request: NextRequest) {
       referenceLink,
       notes,
       reminderDays,
+      profileId,
     } = body
 
     if (!companyId || !title || !deadline) {
@@ -59,16 +61,18 @@ export async function POST(request: NextRequest) {
     const assessment = await prisma.assessment.create({
       data: {
         companyId,
+        profileId: profileId || null,
         title,
         description,
         deadline: new Date(deadline),
         status: status || 'pending',
         referenceLink,
         notes,
-        reminderDays: reminderDays !== undefined ? reminderDays : null,
+        reminderDays: reminderDays !== undefined ? reminderDays : 1,
       },
       include: {
         company: true,
+        profile: true,
       },
     })
 

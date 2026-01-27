@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X, ArrowLeft, Grid3x3, Briefcase, FileText } from 'lucide-react'
+import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X, ArrowLeft, Grid3x3, Briefcase, FileText, User } from 'lucide-react'
 
 const financeNavItems = [
   { href: '/tools/finance', label: 'Dashboard', icon: LayoutDashboard },
@@ -18,6 +18,7 @@ const interviewNavItems = [
   { href: '/tools/interviews/interviews', label: 'Interviews', icon: Calendar },
   { href: '/tools/interviews/assessments', label: 'Assessments', icon: FileText },
   { href: '/tools/interviews/companies', label: 'Companies', icon: Briefcase },
+  { href: '/tools/interviews/profiles', label: 'Profiles', icon: User },
 ]
 
 // Legacy nav items for backward compatibility (redirect to finance routes)

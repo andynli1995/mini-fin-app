@@ -1,26 +1,19 @@
 import Layout from '@/components/Layout'
-import AssessmentsList from '@/components/interviews/AssessmentsList'
-import AddAssessmentButton from '@/components/interviews/AddAssessmentButton'
+import ProfilesList from '@/components/interviews/ProfilesList'
+import AddProfileButton from '@/components/interviews/AddProfileButton'
 import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AssessmentsListPage() {
-  const [assessments, companies, profiles] = await Promise.all([
-    prisma.assessment.findMany({
-      include: {
-        company: true,
-        profile: true,
+export default async function ProfilesPage() {
+  const profiles = await prisma.profile.findMany({
+    orderBy: { name: 'asc' },
+    include: {
+      _count: {
+        select: { interviews: true, assessments: true },
       },
-      orderBy: { deadline: 'asc' },
-    }),
-    prisma.company.findMany({
-      orderBy: { name: 'asc' },
-    }),
-    prisma.profile.findMany({
-      orderBy: { name: 'asc' },
-    }),
-  ])
+    },
+  })
 
   return (
     <Layout>
@@ -28,19 +21,19 @@ export default async function AssessmentsListPage() {
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-              Assessments
+              Profiles
             </h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Track company assessments and deadlines by profile
+              Manage applicant profiles (e.g. Larry, Andy) to tag which profile each application belongs to
             </p>
           </div>
           <div className="flex-shrink-0">
-            <AddAssessmentButton companies={companies} profiles={profiles} />
+            <AddProfileButton />
           </div>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
           <div className="p-4 sm:p-6">
-            <AssessmentsList assessments={assessments} companies={companies} profiles={profiles} />
+            <ProfilesList profiles={profiles} />
           </div>
         </div>
       </div>
