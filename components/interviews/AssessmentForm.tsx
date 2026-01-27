@@ -13,11 +13,11 @@ interface Assessment {
   companyId: string
   title: string
   description: string | null
-  deadline: Date
+  deadline: string | Date
   status: string
   referenceLink: string | null
   notes: string | null
-  submittedAt: Date | null
+  submittedAt: string | Date | null
   reminderDays: number | null
 }
 

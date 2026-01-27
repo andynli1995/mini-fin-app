@@ -13,7 +13,7 @@ interface Interview {
   companyId: string
   role: string
   status: string
-  scheduledAt: Date | null
+  scheduledAt: string | Date | null
   referenceLink: string | null
   notes: string | null
   interviewer: string | null

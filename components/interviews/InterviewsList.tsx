@@ -12,6 +12,7 @@ interface Company {
 
 interface Interview {
   id: string
+  companyId: string
   role: string
   status: string
   scheduledAt: string | Date | null
@@ -19,6 +20,8 @@ interface Interview {
   notes: string | null
   interviewer: string | null
   interviewType: string | null
+  reminderDays: number | null
+  reminderHours: number | null
   company: Company
 }
 

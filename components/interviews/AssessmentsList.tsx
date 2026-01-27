@@ -12,6 +12,7 @@ interface Company {
 
 interface Assessment {
   id: string
+  companyId: string
   title: string
   description: string | null
   deadline: string | Date
@@ -19,6 +20,7 @@ interface Assessment {
   referenceLink: string | null
   notes: string | null
   submittedAt: string | Date | null
+  reminderDays: number | null
   company: Company
 }
 
