@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Menu, Lock, Sun, Moon, Monitor } from 'lucide-react'
 import { usePinLock } from './PinLock'
 import { useTheme } from './ThemeProvider'
@@ -13,6 +14,8 @@ interface NavigationProps {
 export default function Navigation({ onMenuClick }: NavigationProps) {
   const { lockApp } = usePinLock()
   const { theme, setTheme } = useTheme()
+  const pathname = usePathname()
+  const isHomePage = pathname === '/'
 
   const handleLock = () => {
     lockApp()
@@ -22,14 +25,16 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
     <nav className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-30 transition-colors">
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex items-center">
-          {/* Menu button for mobile and desktop */}
-          <button
-            onClick={onMenuClick}
-            className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 mr-3 transition-colors"
-            aria-label="Toggle menu"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
+          {/* Menu button for mobile and desktop - hidden on home page */}
+          {!isHomePage && (
+            <button
+              onClick={onMenuClick}
+              className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 mr-3 transition-colors"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+          )}
           
           {/* Logo */}
           <Link href="/" className="flex items-center" title="Solo Entrepreneur Toolkit">

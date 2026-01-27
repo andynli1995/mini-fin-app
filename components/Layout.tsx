@@ -1,16 +1,25 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Navigation from './Navigation'
 import Sidebar from './Sidebar'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const pathname = usePathname()
+  const isHomePage = pathname === '/'
 
-  // Initialize sidebar state - open on desktop by default
+  // Initialize sidebar state - open on desktop by default, but not on home page
   useEffect(() => {
     setMounted(true)
+    
+    // Always close sidebar on home page
+    if (isHomePage) {
+      setSidebarOpen(false)
+      return
+    }
     
     // Check if there's a saved preference
     const savedState = localStorage.getItem('sidebar-open')
@@ -31,14 +40,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [isHomePage])
 
-  // Save sidebar state to localStorage when it changes
+  // Save sidebar state to localStorage when it changes (but not on home page)
   useEffect(() => {
-    if (mounted) {
+    if (mounted && !isHomePage) {
       localStorage.setItem('sidebar-open', String(sidebarOpen))
     }
-  }, [sidebarOpen, mounted])
+  }, [sidebarOpen, mounted, isHomePage])
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)
@@ -54,12 +63,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Navigation onMenuClick={toggleSidebar} />
 
       <div className="flex flex-1 min-w-0 overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+        {/* Sidebar - hidden on home page */}
+        {!isHomePage && <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />}
 
         {/* Page content - add left margin on desktop when sidebar is open */}
         <main className={`flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 transition-all duration-300 ${
-          sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
+          !isHomePage && sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
         }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
