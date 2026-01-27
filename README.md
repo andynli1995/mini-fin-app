@@ -1,10 +1,21 @@
-# Personal Finance Management App
+# Solo Entrepreneur Toolkit
 
-A clean, simple, and straightforward web-based personal financial management application built with Next.js, TypeScript, and Prisma.
+An all-in-one platform for solo entrepreneurs to manage their business, finances, and productivity tools. Built with Next.js, TypeScript, and Prisma.
+
+## Overview
+
+Solo Entrepreneur Toolkit is a modular platform that provides multiple integrated tools in one application. Currently includes a comprehensive Finance Manager, with more tools coming soon (Interview Manager, etc.).
 
 ## Features
 
-### Core Features
+### Tools Hub
+- **Central Dashboard**: View all available tools at a glance
+- **Critical Info Display**: Each tool card shows key metrics and information
+- **Extensible Architecture**: Easy to add new tools and apps
+
+### Finance Manager Tool
+
+A complete financial management system with:
 
 - **Transaction Management**: Record expenses, income, lend, and rent transactions with categories, dates, amounts, and notes
 - **Virtual Wallet Management**: Create and manage multiple virtual wallets (e.g., Payoneer, MEXC, Bank accounts) with automatic balance tracking
@@ -17,6 +28,10 @@ A clean, simple, and straightforward web-based personal financial management app
   - Monthly trend analysis
   - Transaction volume statistics
 - **Subscription Reminders**: Visual alerts for upcoming (next 7 days) and overdue subscriptions
+
+### Coming Soon
+- Interview Manager: Track job applications, interviews, and follow-ups
+- More tools to be added...
 
 ## Tech Stack
 
@@ -108,28 +123,36 @@ npm run db:push
 ## Project Structure
 
 ```
-mini-fin-app/
+solo-toolkit/
 ├── app/                    # Next.js app directory
 │   ├── api/                # API routes
 │   │   ├── transactions/   # Transaction endpoints
 │   │   ├── wallets/        # Wallet endpoints
 │   │   ├── subscriptions/  # Subscription endpoints
 │   │   └── categories/     # Category endpoints
-│   ├── transactions/       # Transactions page
-│   ├── wallets/            # Wallets page
-│   ├── subscriptions/      # Subscriptions page
-│   ├── reports/            # Reports page
-│   ├── categories/         # Categories page
+│   ├── tools/              # Tools directory
+│   │   └── finance/        # Finance Manager tool
+│   │       ├── page.tsx    # Finance dashboard
+│   │       ├── transactions/
+│   │       ├── wallets/
+│   │       ├── subscriptions/
+│   │       ├── reports/
+│   │       ├── categories/
+│   │       └── settings/
+│   ├── page.tsx            # Tools hub (home page)
 │   └── layout.tsx          # Root layout
 ├── components/             # React components
-│   ├── Dashboard.tsx       # Main dashboard
+│   ├── ToolsHub.tsx        # Tools hub dashboard
+│   ├── Dashboard.tsx       # Finance dashboard
 │   ├── Navigation.tsx      # Navigation bar
+│   ├── Sidebar.tsx         # Sidebar navigation
 │   ├── TransactionForm.tsx # Transaction form
 │   ├── WalletCard.tsx      # Wallet display card
 │   ├── RemindersBanner.tsx # Subscription reminders
 │   └── ...
 ├── lib/                    # Utility functions
-│   └── prisma.ts           # Prisma client
+│   ├── prisma.ts           # Prisma client
+│   └── tools-registry.ts   # Tools registry
 ├── prisma/                 # Database schema
 │   └── schema.prisma       # Prisma schema
 └── public/                 # Static assets
@@ -137,42 +160,74 @@ mini-fin-app/
 
 ## Usage
 
-### Creating Wallets
+### Tools Hub
 
-1. Navigate to the Wallets page
+When you first open the app, you'll see the Tools Hub showing all available tools. Each tool card displays:
+- Tool name and description
+- Critical information (e.g., total balance for Finance Manager)
+- Quick access to the tool
+
+### Finance Manager
+
+#### Creating Wallets
+
+1. Navigate to Finance Manager → Wallets
 2. Click "Add Wallet"
 3. Enter wallet name, type, currency, and initial balance
 4. Wallets automatically track balance based on transactions
 
-### Recording Transactions
+#### Recording Transactions
 
-1. Navigate to the Transactions page
+1. Navigate to Finance Manager → Transactions
 2. Click "Add Transaction"
 3. Select transaction type (expense, income, lend, rent)
 4. Choose category and wallet
 5. Enter amount, date, and optional note
 6. Wallet balance updates automatically
 
-### Managing Subscriptions
+#### Managing Subscriptions
 
-1. Navigate to the Subscriptions page
+1. Navigate to Finance Manager → Subscriptions
 2. Click "Add Subscription"
 3. Enter service name, amount, period, start date, and payment method
 4. Next due date is calculated automatically
 5. Use "Mark as Paid" to record payment and update next due date
 
-### Managing Categories
+#### Managing Categories
 
-1. Navigate to the Categories page
+1. Navigate to Finance Manager → Categories
 2. Click "Add Category"
 3. Enter category name and select transaction type
 4. Categories are organized by type (expense, income, lend, rent)
 
-### Viewing Reports
+#### Viewing Reports
 
-1. Navigate to the Reports page
+1. Navigate to Finance Manager → Reports
 2. Use filters to narrow down transactions by type, category, wallet, or date range
 3. View summary cards, charts, and detailed transaction lists
+
+## Adding New Tools
+
+The toolkit is designed to be easily extensible. To add a new tool:
+
+1. Add tool definition to `lib/tools-registry.ts`:
+```typescript
+{
+  id: 'your-tool',
+  name: 'Your Tool Name',
+  description: 'Tool description',
+  icon: YourIcon,
+  href: '/tools/your-tool',
+  color: 'blue',
+  getCriticalInfo: async () => {
+    // Optional: Return critical info to display on card
+    return { label: 'Metric', value: '123' }
+  },
+}
+```
+
+2. Create tool pages under `app/tools/your-tool/`
+3. Add navigation items in `components/Sidebar.tsx` if needed
 
 ## Design Principles
 
@@ -181,6 +236,7 @@ mini-fin-app/
 - **Task-Based**: Features organized by what users do, not internal structure
 - **Actionable**: Dashboard prompts meaningful actions (e.g., subscription reminders)
 - **Trustworthy**: Clear data presentation and secure transaction handling
+- **Modular**: Each tool is self-contained but integrated into the platform
 
 ## Database Schema
 
@@ -375,6 +431,12 @@ The colored version ensures icons display properly when installed as a PWA.
 
 ## Future Enhancements
 
+### Platform
+- More tools and apps (Interview Manager, Project Manager, etc.)
+- Tool marketplace/plugins
+- Custom tool builder
+
+### Finance Manager
 - User authentication and multi-user support
 - Budget goals and tracking
 - Export functionality (CSV, PDF)
