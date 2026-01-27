@@ -214,7 +214,13 @@ export default function InterviewForm({ interview, companies, profiles, onClose 
                 value={formData.scheduledAt}
                 onChange={(e) => setFormData({ ...formData, scheduledAt: e.target.value })}
                 className="block w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-700 text-gray-900 dark:text-gray-100"
+                aria-describedby="scheduled-at-timezone-hint"
               />
+              <p id="scheduled-at-timezone-hint" className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {typeof Intl !== 'undefined'
+                  ? `Your local time · ${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+                  : 'Your local time'}
+              </p>
             </div>
 
             <div>
