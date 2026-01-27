@@ -41,7 +41,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 border border-gray-200 dark:border-slate-700">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100">Recent Transactions</h2>
-        <Link href="/transactions" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+        <Link href="/tools/finance/transactions" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
           View all
         </Link>
       </div>

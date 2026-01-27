@@ -27,7 +27,7 @@ export default function UpcomingSubscriptions({ subscriptions }: UpcomingSubscri
     <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-6 border border-gray-200 dark:border-slate-700">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Upcoming Subscriptions</h2>
-        <Link href="/subscriptions" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
+        <Link href="/tools/finance/subscriptions" className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors">
           View all
         </Link>
       </div>

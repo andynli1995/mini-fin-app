@@ -2,9 +2,20 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X } from 'lucide-react'
+import { LayoutDashboard, Wallet, Receipt, Calendar, BarChart3, Settings, Settings2, X, ArrowLeft, Grid3x3 } from 'lucide-react'
 
-const navItems = [
+const financeNavItems = [
+  { href: '/tools/finance', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/tools/finance/transactions', label: 'Transactions', icon: Receipt },
+  { href: '/tools/finance/subscriptions', label: 'Subscriptions', icon: Calendar },
+  { href: '/tools/finance/wallets', label: 'Wallets', icon: Wallet },
+  { href: '/tools/finance/reports', label: 'Reports', icon: BarChart3 },
+  { href: '/tools/finance/categories', label: 'Categories', icon: Settings },
+  { href: '/tools/finance/settings', label: 'Settings', icon: Settings2 },
+]
+
+// Legacy nav items for backward compatibility (redirect to finance routes)
+const legacyNavItems = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/transactions', label: 'Transactions', icon: Receipt },
   { href: '/subscriptions', label: 'Subscriptions', icon: Calendar },
@@ -21,6 +32,8 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
+  const isFinanceRoute = pathname?.startsWith('/tools/finance') || pathname === '/transactions' || pathname === '/wallets' || pathname === '/subscriptions' || pathname === '/reports' || pathname === '/categories' || pathname === '/settings'
+  const navItems = isFinanceRoute ? financeNavItems : []
 
   // Only close sidebar on mobile when clicking a link
   const handleLinkClick = () => {
@@ -64,9 +77,22 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {/* Navigation items */}
           <nav className="flex-1 overflow-y-auto py-4">
             <div className="space-y-1 px-2">
+              {/* Back to Tools link when in a tool */}
+              {isFinanceRoute && (
+                <Link
+                  href="/"
+                  onClick={handleLinkClick}
+                  className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-900 dark:hover:text-white mb-2 border-b border-gray-200 dark:border-slate-700 pb-2"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-3 flex-shrink-0" />
+                  <span>Back to Tools</span>
+                </Link>
+              )}
+
+              {/* Finance navigation items */}
               {navItems.map((item) => {
                 const Icon = item.icon
-                const isActive = pathname === item.href
+                const isActive = pathname === item.href || (item.href === '/tools/finance' && pathname === '/tools/finance')
                 return (
                   <Link
                     key={item.href}

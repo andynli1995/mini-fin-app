@@ -5,9 +5,9 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const manifest: MetadataRoute.Manifest = {
-    name: 'Finance Manager',
-    short_name: 'Finance',
-    description: 'Manage your expenses, income, subscriptions, and wallets',
+    name: 'Solo Entrepreneur Toolkit',
+    short_name: 'Toolkit',
+    description: 'All-in-one platform to manage your business, finances, and productivity tools',
     start_url: '/',
     scope: '/',
     display: 'standalone',
@@ -40,20 +40,20 @@ export async function GET() {
         purpose: 'maskable',
       },
     ],
-    categories: ['finance', 'productivity', 'utilities'],
+    categories: ['finance', 'productivity', 'utilities', 'business'],
     shortcuts: [
       {
-        name: 'Dashboard',
-        short_name: 'Dashboard',
-        description: 'View your financial overview',
+        name: 'Tools Hub',
+        short_name: 'Tools',
+        description: 'View all available tools',
         url: '/',
         icons: [{ src: '/logo.svg', sizes: 'any', type: 'image/svg+xml' }],
       },
       {
-        name: 'Add Transaction',
-        short_name: 'Add',
-        description: 'Quickly add a new transaction',
-        url: '/transactions',
+        name: 'Finance Manager',
+        short_name: 'Finance',
+        description: 'Manage your finances',
+        url: '/tools/finance',
         icons: [{ src: '/logo.svg', sizes: 'any', type: 'image/svg+xml' }],
       },
     ],

@@ -102,7 +102,7 @@ export default function WalletsList({ wallets }: WalletsListProps) {
               </p>
             </div>
             <Link
-              href={`/wallets/${wallet.id}`}
+              href={`/tools/finance/wallets/${wallet.id}`}
               className="mt-4 inline-block text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
             >
               View details →

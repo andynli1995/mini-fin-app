@@ -37,7 +37,7 @@ export default function WalletCard({ wallet, defaultHidden = false }: WalletCard
   })
 
   return (
-    <Link href={`/wallets/${wallet.id}`}>
+    <Link href={`/tools/finance/wallets/${wallet.id}`}>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-lg p-4 sm:p-6 hover:shadow-md dark:hover:shadow-xl transition-all cursor-pointer border border-gray-200 dark:border-slate-700">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1 min-w-0">

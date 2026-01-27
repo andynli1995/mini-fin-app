@@ -1,12 +1,12 @@
 import Layout from '@/components/Layout'
-import ToolsHub from '@/components/ToolsHub'
+import Dashboard from '@/components/Dashboard'
 
 export const dynamic = 'force-dynamic'
 
-export default function Home() {
+export default function FinanceDashboard() {
   return (
     <Layout>
-      <ToolsHub />
+      <Dashboard />
     </Layout>
   )
 }

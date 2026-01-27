@@ -32,7 +32,7 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
           </button>
           
           {/* Logo */}
-          <Link href="/" className="flex items-center" title="Finance Manager">
+          <Link href="/" className="flex items-center" title="Solo Entrepreneur Toolkit">
             <Logo size={40} className="text-blue-600 dark:text-blue-400" />
           </Link>
         </div>

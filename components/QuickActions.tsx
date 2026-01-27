@@ -34,7 +34,7 @@ export default function QuickActions({ categories, wallets }: QuickActionsProps)
           </button>
 
           <Link
-            href="/wallets"
+            href="/tools/finance/wallets"
             className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
           >
             <Wallet className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2 transition-colors" />
@@ -44,7 +44,7 @@ export default function QuickActions({ categories, wallets }: QuickActionsProps)
           </Link>
 
           <Link
-            href="/categories"
+            href="/tools/finance/categories"
             className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
           >
             <Tag className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2 transition-colors" />
@@ -54,7 +54,7 @@ export default function QuickActions({ categories, wallets }: QuickActionsProps)
           </Link>
 
           <Link
-            href="/subscriptions"
+            href="/tools/finance/subscriptions"
             className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
           >
             <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-2 transition-colors" />

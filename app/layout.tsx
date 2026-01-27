@@ -8,8 +8,8 @@ import NotificationService from "@/components/NotificationService";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Personal Finance Manager",
-  description: "Manage your expenses, income, subscriptions, and wallets",
+  title: "Solo Entrepreneur Toolkit",
+  description: "All-in-one platform to manage your business, finances, and productivity tools",
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Finance Manager',
+    title: 'Entrepreneur Toolkit',
   },
 };
 

@@ -66,7 +66,7 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
               </p>
             </div>
             <Link
-              href="/subscriptions"
+              href="/tools/finance/subscriptions"
               className="text-sm font-medium text-red-800 dark:text-red-300 hover:text-red-900 dark:hover:text-red-200 transition-colors"
             >
               View →
@@ -101,7 +101,7 @@ export default function RemindersBanner({ subscriptions }: RemindersBannerProps)
               </ul>
             </div>
             <Link
-              href="/subscriptions"
+              href="/tools/finance/subscriptions"
               className="text-sm font-medium text-yellow-800 dark:text-yellow-300 hover:text-yellow-900 dark:hover:text-yellow-200 transition-colors"
             >
               View →
