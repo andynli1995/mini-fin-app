@@ -10,13 +10,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  const isSettingsPage = pathname === '/settings'
+  const shouldShowSidebar = !isHomePage && !isSettingsPage
 
   // Initialize sidebar state - open on desktop by default, but not on home page
   useEffect(() => {
     setMounted(true)
     
-    // Always close sidebar on home page
-    if (isHomePage) {
+    // Always close sidebar on home page and settings page
+    if (isHomePage || isSettingsPage) {
       setSidebarOpen(false)
       return
     }
@@ -40,14 +42,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [isHomePage])
+  }, [isHomePage, isSettingsPage])
 
-  // Save sidebar state to localStorage when it changes (but not on home page)
+  // Save sidebar state to localStorage when it changes (but not on home page or settings)
   useEffect(() => {
-    if (mounted && !isHomePage) {
+    if (mounted && shouldShowSidebar) {
       localStorage.setItem('sidebar-open', String(sidebarOpen))
     }
-  }, [sidebarOpen, mounted, isHomePage])
+  }, [sidebarOpen, mounted, shouldShowSidebar])
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen)
@@ -63,12 +65,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <Navigation onMenuClick={toggleSidebar} />
 
       <div className="flex flex-1 min-w-0 overflow-hidden">
-        {/* Sidebar - hidden on home page */}
-        {!isHomePage && <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />}
+        {/* Sidebar - hidden on home page and settings page */}
+        {shouldShowSidebar && <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />}
 
         {/* Page content - add left margin on desktop when sidebar is open */}
         <main className={`flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 transition-all duration-300 ${
-          !isHomePage && sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
+          shouldShowSidebar && sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'
         }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}

@@ -16,6 +16,8 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
   const { theme, setTheme } = useTheme()
   const pathname = usePathname()
   const isHomePage = pathname === '/'
+  const isSettingsPage = pathname === '/settings'
+  const shouldShowMenu = !isHomePage && !isSettingsPage
 
   const handleLock = () => {
     lockApp()
@@ -25,8 +27,8 @@ export default function Navigation({ onMenuClick }: NavigationProps) {
     <nav className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-30 transition-colors">
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex items-center">
-          {/* Menu button for mobile and desktop - hidden on home page */}
-          {!isHomePage && (
+          {/* Menu button for mobile and desktop - hidden on home page and settings page */}
+          {shouldShowMenu && (
             <button
               onClick={onMenuClick}
               className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-800 mr-3 transition-colors"

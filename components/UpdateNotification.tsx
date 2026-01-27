@@ -13,6 +13,8 @@ export default function UpdateNotification() {
       let registration: ServiceWorkerRegistration | null = null
       let handleUpdateFound: (() => void) | null = null
       let handleControllerChange: (() => void) | null = null
+      let handleVisibilityChange: (() => void) | null = null
+      let handleFocus: (() => void) | null = null
 
       // Check for updates every time the page loads
       navigator.serviceWorker
@@ -40,10 +42,24 @@ export default function UpdateNotification() {
           }
           reg.addEventListener('updatefound', handleUpdateFound)
 
-          // Also check periodically (every 5 minutes)
+          // Also check periodically (every 1 minute for more responsive updates)
           updateInterval = setInterval(() => {
             reg.update()
-          }, 5 * 60 * 1000)
+          }, 60 * 1000)
+
+          // Check for updates when page becomes visible (user returns to app)
+          handleVisibilityChange = () => {
+            if (!document.hidden) {
+              reg.update()
+            }
+          }
+          document.addEventListener('visibilitychange', handleVisibilityChange)
+
+          // Check for updates on page focus
+          handleFocus = () => {
+            reg.update()
+          }
+          window.addEventListener('focus', handleFocus)
         })
         .catch((error) => {
           console.error('Service Worker registration failed:', error)
@@ -66,6 +82,12 @@ export default function UpdateNotification() {
         }
         if (handleControllerChange) {
           navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange)
+        }
+        if (handleVisibilityChange) {
+          document.removeEventListener('visibilitychange', handleVisibilityChange)
+        }
+        if (handleFocus) {
+          window.removeEventListener('focus', handleFocus)
         }
       }
     }
