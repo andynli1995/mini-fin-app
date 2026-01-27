@@ -3,15 +3,16 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { tools, type ToolCriticalInfo } from '@/lib/tools-registry'
-import { ArrowRight, Sparkles, AlertCircle, Bell } from 'lucide-react'
+import { ArrowRight, Sparkles, AlertCircle, Bell, Eye, EyeOff } from 'lucide-react'
 
 interface ToolCardProps {
   tool: typeof tools[0]
   criticalInfo: ToolCriticalInfo | null
   loading: boolean
+  hideBalancesByDefault?: boolean
 }
 
-function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
+function ToolCard({ tool, criticalInfo, loading, hideBalancesByDefault = false }: ToolCardProps) {
   const Icon = tool.icon
   const colorClasses = {
     blue: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-300',
@@ -35,6 +36,43 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
   const hasAlerts = (criticalInfo?.alerts?.length || 0) > 0
   const urgentCount = criticalInfo?.alerts?.filter(alert => alert.urgent).reduce((sum, alert) => sum + alert.count, 0) || 0
   const totalAlertCount = criticalInfo?.alerts?.reduce((sum, alert) => sum + alert.count, 0) || 0
+
+  // Check if the primary value is a balance (contains currency symbols)
+  const isBalanceValue = criticalInfo?.primary?.value && 
+    (typeof criticalInfo.primary.value === 'string' && 
+     (criticalInfo.primary.value.includes('$') || 
+      criticalInfo.primary.value.match(/[A-Z]{3}\s*[\d,]+/))) // Currency code + number pattern
+
+  // State for balance visibility toggle (only for finance tool)
+  const [isBalanceHidden, setIsBalanceHidden] = useState(() => {
+    if (tool.id === 'finance' && isBalanceValue) {
+      if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('hideBalances')
+        if (stored !== null) {
+          return stored === 'true'
+        }
+      }
+      return hideBalancesByDefault
+    }
+    return false
+  })
+
+  useEffect(() => {
+    if (tool.id === 'finance' && isBalanceValue) {
+      setIsBalanceHidden(hideBalancesByDefault)
+      localStorage.setItem('hideBalances', hideBalancesByDefault ? 'true' : 'false')
+    }
+  }, [hideBalancesByDefault, tool.id, isBalanceValue])
+
+  const toggleBalanceVisibility = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (tool.id === 'finance' && isBalanceValue) {
+      const newHidden = !isBalanceHidden
+      setIsBalanceHidden(newHidden)
+      localStorage.setItem('hideBalances', newHidden ? 'true' : 'false')
+    }
+  }
 
   return (
     <Link
@@ -87,15 +125,32 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
           {/* Primary Info */}
           {criticalInfo.primary && (
             <div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
-                {criticalInfo.primary.label}
+              <div className="flex items-center justify-between mb-1">
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                  {criticalInfo.primary.label}
+                </div>
+                {tool.id === 'finance' && isBalanceValue && (
+                  <button
+                    onClick={toggleBalanceVisibility}
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-0.5"
+                    aria-label={isBalanceHidden ? 'Show balance' : 'Hide balance'}
+                  >
+                    {isBalanceHidden ? (
+                      <EyeOff className="w-3 h-3" />
+                    ) : (
+                      <Eye className="w-3 h-3" />
+                    )}
+                  </button>
+                )}
               </div>
               <div className={`text-2xl font-bold ${
                 criticalInfo.primary.urgent 
                   ? 'text-red-600 dark:text-red-400' 
                   : 'text-gray-900 dark:text-gray-100'
               }`}>
-                {criticalInfo.primary.value}
+                {tool.id === 'finance' && isBalanceValue && isBalanceHidden
+                  ? '••••••'
+                  : criticalInfo.primary.value}
               </div>
               {criticalInfo.primary.subtitle && (
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -176,6 +231,24 @@ function ToolCard({ tool, criticalInfo, loading }: ToolCardProps) {
 export default function ToolsHub() {
   const [toolsData, setToolsData] = useState<Map<string, ToolCriticalInfo | null>>(new Map())
   const [loading, setLoading] = useState<Map<string, boolean>>(new Map())
+  const [hideBalancesByDefault, setHideBalancesByDefault] = useState(false)
+
+  useEffect(() => {
+    // Load settings to check hideBalancesByDefault
+    const loadSettings = async () => {
+      try {
+        const response = await fetch('/api/settings')
+        if (response.ok) {
+          const data = await response.json()
+          setHideBalancesByDefault(data.hideBalancesByDefault || false)
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error)
+      }
+    }
+
+    loadSettings()
+  }, [])
 
   useEffect(() => {
     const loadCriticalInfo = async () => {
@@ -242,6 +315,7 @@ export default function ToolsHub() {
             tool={tool}
             criticalInfo={toolsData.get(tool.id) || null}
             loading={loading.get(tool.id) || false}
+            hideBalancesByDefault={hideBalancesByDefault}
           />
         ))}
       </div>
